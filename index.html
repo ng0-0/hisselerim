@@ -44,6 +44,10 @@
         display: none;
       }
 
+      .wrap.detailed-tables {
+        max-width: 1280px;
+      }
+
       .wrap.compact-tables table {
         min-width: 100%;
       }
@@ -1999,7 +2003,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       }
 
       function updateTableMode() {
-        document.querySelector(".wrap").classList.toggle("compact-tables", state.compactTableMode);
+        const wrap = document.querySelector(".wrap");
+        wrap.classList.toggle("compact-tables", state.compactTableMode);
+        wrap.classList.toggle("detailed-tables", !state.compactTableMode);
         els.btnToggleTableMode.textContent = state.compactTableMode ? "Detaylı Görünüm" : "Genel Görünüm";
       }
 
