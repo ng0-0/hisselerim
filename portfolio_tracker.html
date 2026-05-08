@@ -1,0 +1,1839 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hisse Portföy Takip</title>
+    <style>
+      :root {
+        --bg-1: #2f343b;
+        --bg-2: #1f2328;
+        --card: rgba(39, 44, 51, 0.94);
+        --card-2: rgba(48, 55, 63, 0.9);
+        --ink: #f3f7fb;
+        --muted: #b5c0cd;
+        --line: #46505b;
+        --accent: #3b82f6;
+        --accent-2: #dbe9ff;
+        --good: #4ade80;
+        --bad: #f87171;
+        --warn: #fbbf24;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 24%),
+          radial-gradient(circle at top right, rgba(74, 222, 128, 0.08), transparent 22%),
+          linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      }
+
+      .wrap {
+        max-width: 1380px;
+        margin: 28px auto 44px;
+        padding: 0 18px;
+      }
+
+      .hero,
+      .panel,
+      .kpi,
+      .status,
+      .empty {
+        backdrop-filter: blur(10px);
+      }
+
+      .hero {
+        background: linear-gradient(135deg, rgba(44, 50, 57, 0.96), rgba(34, 39, 45, 0.94));
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+      }
+
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 34px;
+        line-height: 1.1;
+      }
+
+      .hero p {
+        margin: 0;
+        max-width: 760px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(56, 64, 73, 0.95);
+        color: var(--accent-2);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .top-actions,
+      .actions,
+      .stack {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .top-actions {
+        display: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .right-column {
+        display: grid;
+        gap: 18px;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 18px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      .panel p {
+        margin: 0 0 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .three-col {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 13px;
+        background: rgba(31, 35, 40, 0.96);
+        color: var(--ink);
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid rgba(11, 107, 203, 0.16);
+        border-color: rgba(11, 107, 203, 0.5);
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        background: var(--accent);
+        color: white;
+      }
+
+      button.secondary {
+        background: #6d8095;
+      }
+
+      button.ghost {
+        background: transparent;
+        color: var(--accent-2);
+        border: 1px solid var(--line);
+      }
+
+      button.warn {
+        background: #805d00;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      .remember {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .remember input {
+        width: auto;
+      }
+
+      .status {
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        padding: 14px 16px;
+        background: rgba(28, 32, 37, 0.95);
+        white-space: pre-wrap;
+        font: 13px/1.5 Consolas, monospace;
+      }
+
+      .status.ok {
+        color: var(--good);
+      }
+
+      .status.err {
+        color: var(--bad);
+      }
+
+      .status.warn {
+        color: var(--warn);
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .kpi {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+        background: var(--card-2);
+      }
+
+      .kpi-label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .kpi-value {
+        font-size: 25px;
+        font-weight: 800;
+      }
+
+      .kpi-note {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .good {
+        color: var(--good);
+      }
+
+      .bad {
+        color: var(--bad);
+      }
+
+      .tables {
+        display: grid;
+        gap: 18px;
+      }
+
+      .tables > div:nth-child(1) {
+        order: 2;
+      }
+
+      .tables > div:nth-child(2) {
+        order: 1;
+      }
+
+      .tables > div:nth-child(3) {
+        order: 3;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 920px;
+      }
+
+      th,
+      td {
+        padding: 12px 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 14px;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        background: #1f3b58;
+        color: white;
+        z-index: 1;
+      }
+
+      td.num,
+      th.num {
+        text-align: right;
+      }
+
+      tbody tr:nth-child(even) td {
+        background: rgba(45, 51, 59, 0.86);
+      }
+
+      tbody tr:hover td {
+        background: rgba(60, 68, 78, 0.92);
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .toolbar small {
+        color: var(--muted);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.18);
+        color: var(--accent-2);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .empty {
+        border: 1px dashed var(--line);
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: var(--muted);
+        background: rgba(31, 35, 40, 0.75);
+      }
+
+      .inline-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .status-panel {
+        margin-top: 18px;
+      }
+
+      .inline-actions button {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      @media (max-width: 1180px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .kpi-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        body {
+          font-size: 15px;
+        }
+
+        .hero-top,
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .two-col,
+        .three-col,
+        .kpi-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .wrap {
+          margin: 14px auto 28px;
+          padding: 0 10px;
+        }
+
+        .hero {
+          padding: 18px;
+          border-radius: 20px;
+        }
+
+        h1 {
+          font-size: 28px;
+          margin-bottom: 0;
+        }
+
+        .panel {
+          padding: 14px;
+          border-radius: 18px;
+        }
+
+        .panel h2 {
+          font-size: 18px;
+          margin-bottom: 10px;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+
+        .actions button {
+          width: 100%;
+        }
+
+        .remember {
+          font-size: 14px;
+        }
+
+        .kpi {
+          padding: 14px;
+          border-radius: 16px;
+        }
+
+        .kpi-value {
+          font-size: 20px;
+        }
+
+        .table-wrap {
+          border-radius: 14px;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+          min-width: 760px;
+        }
+
+        th,
+        td {
+          padding: 10px 8px;
+          font-size: 13px;
+        }
+
+        .inline-actions {
+          gap: 6px;
+        }
+
+        .inline-actions button {
+          padding: 7px 10px;
+          font-size: 11px;
+        }
+
+        .status-panel {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <h1>Hisse Portföy Takip</h1>
+          </div>
+          <div class="badge" id="connectionBadge">Dropbox bagli degil</div>
+        </div>
+      </section>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2>Dropbox Baglantisi</h2>
+          <div class="form-grid">
+            <div>
+              <label for="appKeyInput">Dropbox App Key</label>
+              <input id="appKeyInput" type="text" placeholder="Dropbox app key" />
+            </div>
+            <label class="remember">
+              <input id="rememberDropbox" type="checkbox" checked />
+              Dropbox baglantisini hatirla
+            </label>
+            <div class="actions">
+              <button type="button" id="btnConnectDropbox">Dropbox ile Baglan</button>
+              <button type="button" id="btnDisconnectDropbox" class="ghost">Baglantiyi Kaldir</button>
+            </div>
+          </div>
+
+          <h2 style="margin-top:18px;">İşlem Girişi</h2>
+
+          <form id="txForm" class="form-grid">
+            <input id="txId" type="hidden" />
+            <div class="two-col">
+              <div>
+                <label for="symbolInput">Hisse Kodu</label>
+                <input id="symbolInput" type="text" placeholder="VAKFAE" />
+              </div>
+              <div>
+                <label for="typeInput">İşlem Türü</label>
+                <select id="typeInput">
+                  <option value="BUY">ALIS</option>
+                  <option value="SELL">SATIS</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div>
+                <label for="qtyInput">Lot</label>
+                <input id="qtyInput" type="number" min="0" step="0.0001" placeholder="1000" />
+              </div>
+              <div>
+                <label for="priceInput">Fiyat</label>
+                <input id="priceInput" type="number" min="0" step="0.0001" placeholder="13.66" />
+              </div>
+            </div>
+
+            <label class="remember">
+              <input id="zeroCostInput" type="checkbox" />
+              Sıfır maliyetli taşınan lot
+            </label>
+
+            <div>
+              <label for="dateInput">İşlem Tarihi</label>
+              <input id="dateInput" type="date" />
+            </div>
+
+            <div class="actions">
+              <button type="submit" id="btnSaveTx">İşlemi Kaydet</button>
+              <button type="button" id="btnResetForm" class="ghost">Formu Temizle</button>
+            </div>
+          </form>
+        </aside>
+
+        <main class="right-column">
+          <section class="panel">
+            <div class="toolbar">
+              <div>
+                <h2 style="margin-bottom:4px;">Portföy Özeti</h2>
+                <small id="summaryMeta">Veri bekleniyor.</small>
+              </div>
+              <span class="chip" id="recordCountChip">0 kayit</span>
+            </div>
+            <div class="kpi-grid" id="kpiGrid"></div>
+          </section>
+
+          <section class="panel tables">
+            <div>
+              <div class="toolbar">
+                <div>
+                  <h2 style="margin-bottom:4px;">Hisse Bazli Sonuclar</h2>
+                  <small>Kapanan lotlar için gerçekleşen K/Z ve açık lotların durumu.</small>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table id="summaryTable">
+                  <thead>
+                    <tr>
+                      <th>Hisse</th>
+                      <th class="num">Alış Lot</th>
+                      <th class="num">Satış Lot</th>
+                      <th class="num">Açık Lot</th>
+                      <th class="num">Güncel Fiyat</th>
+                      <th class="num">Alış Tutar</th>
+                      <th class="num">Satış Tutar</th>
+                      <th class="num">Gerç. K/Z</th>
+                      <th class="num">Açık K/Z</th>
+                      <th class="num">Toplam K/Z</th>
+                      <th class="num">K/Z %</th>
+                      <th class="num">Kapalı Ort. Gün</th>
+                      <th class="num">Açık Ort. Gün</th>
+                      <th class="num">Ort. Maliyet</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <div class="toolbar">
+                <div>
+                  <h2 style="margin-bottom:4px;">Açık Pozisyonlar</h2>
+                  <small>Elde tutulan lotlar ve maliyetleri.</small>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table id="openTable">
+                  <thead>
+                    <tr>
+                      <th>Hisse</th>
+                      <th class="num">Açık Lot</th>
+                      <th class="num">Güncel Fiyat</th>
+                      <th class="num">Ort. Maliyet</th>
+                      <th class="num">Açık K/Z</th>
+                      <th class="num">K/Z %</th>
+                      <th class="num">Günlük K/Z</th>
+                      <th class="num">Toplam Maliyet</th>
+                      <th class="num">Ort. Gün</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <div class="toolbar">
+                <div>
+                  <h2 style="margin-bottom:4px;">İşlem Geçmişi</h2>
+                  <small>Tüm kayıtlar tarihe göre tersten sıralı.</small>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table id="historyTable">
+                  <thead>
+                    <tr>
+                      <th>Tarih</th>
+                      <th>Hisse</th>
+                      <th>Tur</th>
+                      <th class="num">Lot</th>
+                      <th class="num">Fiyat</th>
+                      <th>0 Maliyet</th>
+                      <th class="num">Vergi</th>
+                      <th class="num">Net Tutar</th>
+                      <th class="num">İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel status-panel">
+            <h2>Durum</h2>
+            <div class="status warn" id="statusBox">
+Hazir.
+Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEYS = {
+        appKey: "portfolio.dropboxAppKey",
+        remember: "portfolio.rememberDropbox",
+        refreshToken: "portfolio.dropboxRefreshToken",
+        accessToken: "portfolio.dropboxAccessToken",
+        accessTokenExpiresAt: "portfolio.dropboxAccessTokenExpiresAt",
+        accountName: "portfolio.dropboxAccountName",
+        localData: "portfolio.localData",
+      };
+
+      const SESSION_KEYS = {
+        codeVerifier: "portfolio.pkceCodeVerifier",
+        oauthState: "portfolio.oauthState",
+      };
+
+      const state = {
+        path: "/hisselerim.json",
+        appKey: "",
+        rememberDropbox: true,
+        accessToken: "",
+        refreshToken: "",
+        accessTokenExpiresAt: "",
+        accountName: "",
+        autoLoadTried: false,
+        livePrices: {},
+        livePreviousCloses: {},
+        livePriceStatus: "idle",
+        lastPriceKey: "",
+        data: {
+          schemaVersion: 1,
+          updatedAt: null,
+          transactions: [],
+        },
+      };
+
+      const els = {
+        appKeyInput: document.getElementById("appKeyInput"),
+        rememberDropbox: document.getElementById("rememberDropbox"),
+        btnConnectDropbox: document.getElementById("btnConnectDropbox"),
+        btnDisconnectDropbox: document.getElementById("btnDisconnectDropbox"),
+        statusBox: document.getElementById("statusBox"),
+        connectionBadge: document.getElementById("connectionBadge"),
+        summaryMeta: document.getElementById("summaryMeta"),
+        recordCountChip: document.getElementById("recordCountChip"),
+        kpiGrid: document.getElementById("kpiGrid"),
+        summaryTableBody: document.querySelector("#summaryTable tbody"),
+        openTableBody: document.querySelector("#openTable tbody"),
+        historyTableBody: document.querySelector("#historyTable tbody"),
+        txForm: document.getElementById("txForm"),
+        txId: document.getElementById("txId"),
+        symbolInput: document.getElementById("symbolInput"),
+        typeInput: document.getElementById("typeInput"),
+        qtyInput: document.getElementById("qtyInput"),
+        priceInput: document.getElementById("priceInput"),
+        zeroCostInput: document.getElementById("zeroCostInput"),
+        dateInput: document.getElementById("dateInput"),
+      };
+
+      function setStatus(text, kind = "warn") {
+        els.statusBox.textContent = text;
+        els.statusBox.className = `status ${kind}`;
+      }
+
+      function money(value) {
+        if (value == null || Number.isNaN(value)) return "-";
+        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
+      }
+
+      function numberFmt(value, digits = 0) {
+        if (value == null || Number.isNaN(value)) return "-";
+        return value.toLocaleString("tr-TR", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        });
+      }
+
+      function daysFmt(value) {
+        if (value == null || Number.isNaN(value)) return "-";
+        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gün`;
+      }
+
+      function pctFmt(value) {
+        if (value == null || Number.isNaN(value)) return "-";
+        return `%${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+
+      function toNumber(value) {
+        if (value === "" || value == null) return null;
+        const num = Number(value);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function normalizeMarketSymbol(symbol) {
+        const raw = String(symbol || "").trim().toUpperCase();
+        if (!raw) return "";
+
+        const specialMap = {
+          GARANE: "GARAN",
+          THYAOE: "THYAO",
+          VAKFAE: "VAKFN",
+          AKBNKE: "AKBNK",
+          AKCNSE: "AKCNS",
+          AKGRTE: "AKGRT",
+          ALCARE: "ALCAR",
+          AYCESE: "AYCES",
+          AYDEME: "AYDEM",
+          BRSANE: "BRSAN",
+          BRYATE: "BRYAT",
+          BUCIME: "BUCIM",
+          DURKNH: "DURKN",
+          ENDAEE: "ENDAE",
+          EMPAEE: "EMPAE",
+          EREGLE: "EREGL",
+          FRMPLE: "FRMPL",
+          GESANE: "GESAN",
+          GSDDEE: "GSDDE",
+          LILAKE: "LILAK",
+          LXGYOE: "LXGYO",
+          MCARDE: "MCARD",
+          MEYSUE: "MEYSU",
+          MGROSE: "MGROS",
+          NETCDE: "NETCD",
+          PGSUSE: "PGSUS",
+          RGYASE: "RGYAS",
+          SVGYOE: "SVGYO",
+          TCELLE: "TCELL",
+          UCAYME: "UCAYM",
+          ULKERE: "ULKER",
+          VRGYOE: "VRGYO",
+        };
+
+        if (specialMap[raw]) return specialMap[raw];
+        if (raw.length > 5 && raw.endsWith("E")) return raw.slice(0, -1);
+        return raw;
+      }
+
+      function getMarketSymbolCandidates(symbol) {
+        const raw = String(symbol || "").trim().toUpperCase();
+        const normalized = normalizeMarketSymbol(raw);
+        const stripped = raw.length > 5 && raw.endsWith("E") ? raw.slice(0, -1) : raw;
+        return [...new Set([raw, normalized, stripped].filter(Boolean))];
+      }
+
+      function nowLocalInputValue() {
+        const now = new Date();
+        const tzOffset = now.getTimezoneOffset() * 60000;
+        return new Date(now.getTime() - tzOffset).toISOString().slice(0, 10);
+      }
+
+      function todayLocalDateKey() {
+        return nowLocalInputValue();
+      }
+
+      function generateId() {
+        return `tx_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function sanitizeData(input) {
+        const safe = input && typeof input === "object" ? input : {};
+        const txs = Array.isArray(safe.transactions) ? safe.transactions : [];
+        return {
+          schemaVersion: 1,
+          updatedAt: safe.updatedAt || null,
+          marketSnapshots: {
+            currentDate: safe.marketSnapshots?.currentDate || null,
+            currentCloses: safe.marketSnapshots?.currentCloses && typeof safe.marketSnapshots.currentCloses === "object"
+              ? safe.marketSnapshots.currentCloses
+              : {},
+            previousDate: safe.marketSnapshots?.previousDate || null,
+            previousCloses: safe.marketSnapshots?.previousCloses && typeof safe.marketSnapshots.previousCloses === "object"
+              ? safe.marketSnapshots.previousCloses
+              : {},
+          },
+          transactions: txs
+            .map((tx) => ({
+              id: tx.id || generateId(),
+              symbol: (tx.symbol || "").toString().trim().toUpperCase(),
+              type: (tx.type || "BUY").toString().trim().toUpperCase(),
+              quantity: toNumber(tx.quantity) ?? 0,
+              price: toNumber(tx.price),
+              referencePrice: toNumber(tx.referencePrice) ?? toNumber(tx.price),
+              commission: toNumber(tx.commission) ?? 0,
+              tax: toNumber(tx.tax) ?? 0,
+              amount: toNumber(tx.amount),
+              zeroCost: Boolean(tx.zeroCost),
+              tradeDate: tx.tradeDate || new Date().toISOString(),
+              note: (tx.note || "").toString(),
+            }))
+            .sort((a, b) => new Date(a.tradeDate) - new Date(b.tradeDate)),
+        };
+      }
+
+      function persistSettings() {
+        state.appKey = els.appKeyInput.value.trim();
+        state.path = "/hisselerim.json";
+        state.rememberDropbox = els.rememberDropbox.checked;
+
+        localStorage.setItem(STORAGE_KEYS.appKey, state.appKey);
+        localStorage.setItem(STORAGE_KEYS.remember, String(state.rememberDropbox));
+
+        if (!state.rememberDropbox) {
+          localStorage.removeItem(STORAGE_KEYS.refreshToken);
+          localStorage.removeItem(STORAGE_KEYS.accessToken);
+          localStorage.removeItem(STORAGE_KEYS.accessTokenExpiresAt);
+          localStorage.removeItem(STORAGE_KEYS.accountName);
+          state.refreshToken = "";
+          state.accessToken = "";
+          state.accessTokenExpiresAt = "";
+          state.accountName = "";
+        }
+      }
+
+      function persistLocalData() {
+        localStorage.setItem(STORAGE_KEYS.localData, JSON.stringify(state.data));
+      }
+
+      function updateMarketSnapshots(prices) {
+        if (!prices || !Object.keys(prices).length) return false;
+        const today = todayLocalDateKey();
+        const snapshots = state.data.marketSnapshots || {
+          currentDate: null,
+          currentCloses: {},
+          previousDate: null,
+          previousCloses: {},
+        };
+
+        if (snapshots.currentDate !== today) {
+          if (snapshots.currentDate && Object.keys(snapshots.currentCloses || {}).length) {
+            snapshots.previousDate = snapshots.currentDate;
+            snapshots.previousCloses = { ...(snapshots.currentCloses || {}) };
+          }
+          snapshots.currentDate = today;
+          snapshots.currentCloses = { ...prices };
+        } else {
+          snapshots.currentCloses = { ...(snapshots.currentCloses || {}), ...prices };
+        }
+
+        state.data.marketSnapshots = snapshots;
+        persistLocalData();
+        return true;
+      }
+
+      function loadLocalState() {
+        const remembered = localStorage.getItem(STORAGE_KEYS.remember);
+        const appKey = localStorage.getItem(STORAGE_KEYS.appKey) || "";
+        const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken) || "";
+        const accessToken = localStorage.getItem(STORAGE_KEYS.accessToken) || "";
+        const accessTokenExpiresAt = localStorage.getItem(STORAGE_KEYS.accessTokenExpiresAt) || "";
+        const accountName = localStorage.getItem(STORAGE_KEYS.accountName) || "";
+        const localData = localStorage.getItem(STORAGE_KEYS.localData);
+
+        state.rememberDropbox = remembered !== "false";
+        state.appKey = appKey;
+        state.refreshToken = refreshToken;
+        state.accessToken = accessToken;
+        state.accessTokenExpiresAt = accessTokenExpiresAt;
+        state.accountName = accountName;
+        state.path = "/hisselerim.json";
+
+        els.rememberDropbox.checked = state.rememberDropbox;
+        els.appKeyInput.value = appKey;
+        els.dateInput.value = nowLocalInputValue();
+
+        if (localData) {
+          try {
+            state.data = sanitizeData(JSON.parse(localData));
+          } catch (_) {}
+        }
+      }
+
+      function updateConnectionBadge() {
+        if (state.accountName) {
+          els.connectionBadge.textContent = `Dropbox bagli: ${state.accountName}`;
+          return;
+        }
+        const hasRefresh = !!state.refreshToken;
+        els.connectionBadge.textContent = hasRefresh ? "Dropbox bagli" : "Dropbox bagli degil";
+      }
+
+      async function maybeAutoLoadDropbox(force = false) {
+        persistSettings();
+        if (!state.refreshToken && !state.accessToken) return;
+        if (!force && state.autoLoadTried) return;
+        state.autoLoadTried = true;
+        try {
+          await readDropboxFile(true);
+        } catch (_) {
+          // status already shown by readDropboxFile
+        }
+      }
+
+      function getRedirectUri() {
+        return `${window.location.origin}${window.location.pathname}`;
+      }
+
+      function base64UrlEncode(arrayBuffer) {
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = "";
+        bytes.forEach((b) => {
+          binary += String.fromCharCode(b);
+        });
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      }
+
+      function randomString(length = 64) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+        const arr = new Uint8Array(length);
+        crypto.getRandomValues(arr);
+        return Array.from(arr, (v) => chars[v % chars.length]).join("");
+      }
+
+      async function sha256(input) {
+        const encoder = new TextEncoder();
+        return crypto.subtle.digest("SHA-256", encoder.encode(input));
+      }
+
+      async function connectDropbox() {
+        persistSettings();
+        if (!state.appKey) {
+          setStatus("Dropbox App Key gerekli.", "err");
+          return;
+        }
+
+        const verifier = randomString(64);
+        const stateParam = randomString(32);
+        const challenge = base64UrlEncode(await sha256(verifier));
+
+        sessionStorage.setItem(SESSION_KEYS.codeVerifier, verifier);
+        sessionStorage.setItem(SESSION_KEYS.oauthState, stateParam);
+
+        const params = new URLSearchParams({
+          client_id: state.appKey,
+          response_type: "code",
+          token_access_type: "offline",
+          code_challenge: challenge,
+          code_challenge_method: "S256",
+          redirect_uri: getRedirectUri(),
+          state: stateParam,
+        });
+
+        window.location.href = `https://www.dropbox.com/oauth2/authorize?${params.toString()}`;
+      }
+
+      function disconnectDropbox() {
+        state.accessToken = "";
+        state.refreshToken = "";
+        state.accessTokenExpiresAt = "";
+        state.accountName = "";
+        state.autoLoadTried = false;
+        localStorage.removeItem(STORAGE_KEYS.refreshToken);
+        localStorage.removeItem(STORAGE_KEYS.accessToken);
+        localStorage.removeItem(STORAGE_KEYS.accessTokenExpiresAt);
+        localStorage.removeItem(STORAGE_KEYS.accountName);
+        updateConnectionBadge();
+        setStatus("Dropbox baglantisi kaldirildi.", "warn");
+      }
+
+      async function exchangeCodeForTokens(code) {
+        const verifier = sessionStorage.getItem(SESSION_KEYS.codeVerifier);
+        if (!verifier) throw new Error("PKCE code verifier bulunamadi.");
+
+        const body = new URLSearchParams({
+          code,
+          grant_type: "authorization_code",
+          client_id: state.appKey,
+          code_verifier: verifier,
+          redirect_uri: getRedirectUri(),
+        });
+
+        const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: body.toString(),
+        });
+        const text = await res.text();
+        if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+        const json = JSON.parse(text);
+        applyTokenResponse(json);
+      }
+
+      function applyTokenResponse(json) {
+        state.accessToken = json.access_token || "";
+        state.refreshToken = json.refresh_token || state.refreshToken || "";
+        state.accessTokenExpiresAt = json.expires_in
+          ? new Date(Date.now() + json.expires_in * 1000).toISOString()
+          : state.accessTokenExpiresAt;
+
+        if (state.rememberDropbox) {
+          localStorage.setItem(STORAGE_KEYS.accessToken, state.accessToken);
+          localStorage.setItem(STORAGE_KEYS.refreshToken, state.refreshToken);
+          localStorage.setItem(STORAGE_KEYS.accessTokenExpiresAt, state.accessTokenExpiresAt);
+        }
+      }
+
+      async function refreshAccessToken() {
+        persistSettings();
+        if (!state.appKey || !state.refreshToken) {
+          throw new Error("Refresh token bulunamadi. Lutfen Dropbox ile tekrar baglanin.");
+        }
+
+        const body = new URLSearchParams({
+          refresh_token: state.refreshToken,
+          grant_type: "refresh_token",
+          client_id: state.appKey,
+        });
+
+        const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: body.toString(),
+        });
+        const text = await res.text();
+        if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+        const json = JSON.parse(text);
+        applyTokenResponse(json);
+        return state.accessToken;
+      }
+
+      async function ensureValidAccessToken() {
+        persistSettings();
+        if (state.accessToken && state.accessTokenExpiresAt) {
+          const expiresAt = new Date(state.accessTokenExpiresAt).getTime();
+          if (expiresAt - Date.now() > 60000) {
+            return state.accessToken;
+          }
+        }
+        return refreshAccessToken();
+      }
+
+      async function fetchAccount() {
+        const token = await ensureValidAccessToken();
+        const res = await fetch("https://api.dropboxapi.com/2/users/get_current_account", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: "null",
+        });
+        const text = await res.text();
+        if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+        const json = JSON.parse(text);
+        state.accountName = json.name.display_name || "";
+        if (state.rememberDropbox) {
+          localStorage.setItem(STORAGE_KEYS.accountName, state.accountName);
+        }
+        updateConnectionBadge();
+        return json;
+      }
+
+      async function handleOAuthRedirect() {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        const stateParam = url.searchParams.get("state");
+        const error = url.searchParams.get("error_description") || url.searchParams.get("error");
+        if (!code && !error) return;
+
+        window.history.replaceState({}, document.title, getRedirectUri());
+
+        if (error) {
+          setStatus(`Dropbox baglanti hatasi.\n${error}`, "err");
+          return;
+        }
+
+        const expectedState = sessionStorage.getItem(SESSION_KEYS.oauthState);
+        if (!expectedState || expectedState !== stateParam) {
+          setStatus("Dropbox baglanti guvenlik kontrolu basarisiz oldu.", "err");
+          return;
+        }
+
+        try {
+          setStatus("Dropbox baglantisi tamamlaniyor...");
+          await exchangeCodeForTokens(code);
+          sessionStorage.removeItem(SESSION_KEYS.codeVerifier);
+          sessionStorage.removeItem(SESSION_KEYS.oauthState);
+          await fetchAccount();
+          setStatus("Dropbox baglantisi kuruldu. Veri yukleniyor...", "ok");
+          await maybeAutoLoadDropbox(true);
+        } catch (oauthError) {
+          setStatus(`Dropbox token alma basarisiz.\n${String(oauthError)}`, "err");
+        }
+      }
+
+      async function readDropboxFile(showSuccess = true) {
+        setStatus("Dropbox dosyasi okunuyor...");
+        try {
+          const token = await ensureValidAccessToken();
+          const res = await fetch("https://content.dropboxapi.com/2/files/download", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Dropbox-API-Arg": JSON.stringify({ path: state.path }),
+            },
+          });
+
+          const text = await res.text();
+          if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+
+          const parsed = text.trim() ? JSON.parse(text) : { transactions: [] };
+          state.data = sanitizeData(parsed);
+          persistLocalData();
+          await refreshPricesAndRender();
+
+          if (showSuccess) {
+            setStatus(
+              `Dropbox'tan veri yuklendi.\nKayit: ${state.data.transactions.length}\nDosya: ${state.path}`,
+              "ok"
+            );
+          }
+          await fetchAccount().catch(() => {});
+          return state.data;
+        } catch (error) {
+          setStatus(`Dropbox okuma basarisiz.\n${String(error)}`, "err");
+          throw error;
+        }
+      }
+
+      async function writeDropboxFile(showSuccess = true) {
+        state.data.updatedAt = new Date().toISOString();
+        persistLocalData();
+        setStatus("Dropbox'a veri yaziliyor...");
+
+        try {
+          const token = await ensureValidAccessToken();
+          const payload = JSON.stringify(state.data, null, 2);
+          const res = await fetch("https://content.dropboxapi.com/2/files/upload", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/octet-stream",
+              "Dropbox-API-Arg": JSON.stringify({
+                path: state.path,
+                mode: "overwrite",
+                autorename: false,
+                mute: false,
+                strict_conflict: false,
+              }),
+            },
+            body: payload,
+          });
+
+          const text = await res.text();
+          if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+          const json = JSON.parse(text);
+          if (showSuccess) {
+            setStatus(
+              `Dropbox'a kaydedildi.\nRev: ${json.rev}\nClient modified: ${json.client_modified || "-"}`,
+              "ok"
+            );
+          }
+          await fetchAccount().catch(() => {});
+          return json;
+        } catch (error) {
+          setStatus(`Dropbox yazma basarisiz.\n${String(error)}`, "err");
+          throw error;
+        }
+      }
+
+      async function loadLivePrices(symbols) {
+        const uniqueSymbols = [...new Set((symbols || []).flatMap((value) => getMarketSymbolCandidates(value)))];
+        if (!uniqueSymbols.length) {
+          state.livePrices = {};
+          state.livePreviousCloses = {};
+          state.livePriceStatus = "idle";
+          state.lastPriceKey = "";
+          return;
+        }
+
+        const key = uniqueSymbols.sort().join("|");
+        const today = todayLocalDateKey();
+        const snapshotCurrentCloses = state.data.marketSnapshots?.currentCloses || {};
+        const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
+        const hasTodaySnapshot =
+          state.data.marketSnapshots?.currentDate === today &&
+          uniqueSymbols.every((symbol) => Number.isFinite(snapshotCurrentCloses[symbol]));
+
+        if (hasTodaySnapshot) {
+          state.livePrices = Object.fromEntries(
+            uniqueSymbols.filter((symbol) => Number.isFinite(snapshotCurrentCloses[symbol])).map((symbol) => [symbol, snapshotCurrentCloses[symbol]])
+          );
+          state.livePreviousCloses = Object.fromEntries(
+            uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
+          );
+          state.livePriceStatus = "ready";
+          state.lastPriceKey = key;
+          return;
+        }
+
+        if (state.lastPriceKey === key && state.livePriceStatus === "ready") return;
+
+        state.livePriceStatus = "loading";
+        try {
+          const next = {};
+          const previousCloses = Object.fromEntries(
+            uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
+          );
+
+          const res = await fetch("https://api.fintables.com/radar/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              filters: { type: "group", operator: "and", children: [] },
+              columns: [{ attribute_id: "close" }],
+            }),
+          });
+
+          const json = await res.json();
+          (json.data || []).forEach((row) => {
+            const symbol = String(row.code || "").toUpperCase();
+            const price = Number(row.close);
+            if (uniqueSymbols.includes(symbol) && Number.isFinite(price) && price > 0) {
+              next[symbol] = price;
+            }
+          });
+
+          state.livePrices = next;
+          state.livePreviousCloses = previousCloses;
+          updateMarketSnapshots(next);
+          state.livePriceStatus = "ready";
+          state.lastPriceKey = key;
+        } catch (error) {
+          state.livePriceStatus = "error";
+          console.error("live price error", error);
+        }
+      }
+
+      function computeTransactionAmount(tx) {
+        if (tx.type === "BUY" && tx.zeroCost) return 0;
+
+        if (tx.amount != null && Number.isFinite(tx.amount)) return tx.amount;
+
+        const qty = tx.quantity || 0;
+        const price = tx.price || 0;
+        const commission = tx.commission || 0;
+        const tax = tx.tax || 0;
+        const gross = qty * price;
+
+        if (tx.type === "BUY") return -(gross + commission + tax);
+        if (tx.type === "SELL") return gross - commission - tax;
+        if (tx.type === "DIVIDEND") return gross || 0;
+        if (tx.type === "FEE") return -(gross || commission || tax || 0);
+        return gross;
+      }
+
+      function analyzePortfolio(transactions, livePrices = {}, livePreviousCloses = {}) {
+        const sorted = [...transactions].sort((a, b) => new Date(a.tradeDate) - new Date(b.tradeDate));
+        const positions = new Map();
+        const perSymbol = new Map();
+        const now = new Date();
+        const totals = {
+          buyAmount: 0,
+          sellAmount: 0,
+          dividendAmount: 0,
+          feeAmount: 0,
+          realizedPnl: 0,
+          realizedCostBasis: 0,
+          realizedPnlPct: null,
+          unrealizedPnl: 0,
+          unrealizedPnlPct: null,
+          totalPnl: 0,
+          openCost: 0,
+          openMarketValue: 0,
+          costBearingOpenValueWeightedDaysTotal: 0,
+          costBearingOpenMarketValue: 0,
+          portfolioOpenAvgDays: null,
+          transactionCount: sorted.length,
+        };
+
+        function ensureSymbol(symbol) {
+          if (!perSymbol.has(symbol)) {
+            perSymbol.set(symbol, {
+              symbol,
+              buyQty: 0,
+              sellQty: 0,
+              buyAmount: 0,
+              sellAmount: 0,
+              realizedPnl: 0,
+              closedCostBasis: 0,
+              closedHoldingWeightedDays: 0,
+              closedHoldingQty: 0,
+              openQty: 0,
+              openCost: 0,
+              zeroCostOpenQty: 0,
+              zeroCostOpenValue: 0,
+              openHoldingWeightedDays: 0,
+              avgCost: null,
+              openAvgDays: null,
+              closedAvgDays: null,
+              openPnlPct: null,
+              pnlPct: null,
+            });
+          }
+          if (!positions.has(symbol)) positions.set(symbol, []);
+          return perSymbol.get(symbol);
+        }
+
+        for (const tx of sorted) {
+          const amount = computeTransactionAmount(tx);
+          tx._computedAmount = amount;
+          const symbol = (tx.symbol || "").toUpperCase();
+
+          if (tx.type === "BUY") {
+            const item = ensureSymbol(symbol);
+            item.buyQty += tx.quantity || 0;
+            item.buyAmount += Math.abs(amount);
+            totals.buyAmount += Math.abs(amount);
+
+            const qty = tx.quantity || 0;
+            const unitCost = qty ? Math.abs(amount) / qty : 0;
+            positions.get(symbol).push({
+              qty,
+              unitCost,
+              marketPrice: tx.referencePrice ?? tx.price ?? 0,
+              tradeDate: new Date(tx.tradeDate),
+            });
+            continue;
+          }
+
+          if (tx.type === "SELL") {
+            const item = ensureSymbol(symbol);
+            item.sellQty += tx.quantity || 0;
+            item.sellAmount += amount;
+            totals.sellAmount += amount;
+
+            let remaining = tx.quantity || 0;
+            const proceedsUnit = remaining ? amount / remaining : 0;
+            const saleDate = new Date(tx.tradeDate);
+            const lots = positions.get(symbol);
+
+            while (remaining > 1e-9 && lots.length) {
+              const lot = lots[0];
+              const usedQty = Math.min(remaining, lot.qty);
+              const costBasis = usedQty * lot.unitCost;
+              const proceeds = usedQty * proceedsUnit;
+              const holdingDays = Math.max((saleDate - lot.tradeDate) / 86400000, 0);
+
+              item.realizedPnl += proceeds - costBasis;
+              item.closedCostBasis += costBasis;
+              item.closedHoldingWeightedDays += holdingDays * usedQty;
+              item.closedHoldingQty += usedQty;
+
+              lot.qty -= usedQty;
+              remaining -= usedQty;
+
+              if (lot.qty <= 1e-9) lots.shift();
+            }
+
+            totals.realizedPnl += item.realizedPnl - (item._lastRealizedPnl || 0);
+            totals.realizedCostBasis += item.closedCostBasis - (item._lastClosedCostBasis || 0);
+            item._lastRealizedPnl = item.realizedPnl;
+            item._lastClosedCostBasis = item.closedCostBasis;
+            continue;
+          }
+
+          if (tx.type === "DIVIDEND") {
+            totals.dividendAmount += amount;
+            if (symbol) ensureSymbol(symbol);
+            continue;
+          }
+
+          if (tx.type === "FEE") {
+            totals.feeAmount += amount;
+            if (symbol) ensureSymbol(symbol);
+          }
+        }
+
+        const openRows = [];
+        for (const [symbol, lots] of positions.entries()) {
+          const item = ensureSymbol(symbol);
+          let openQty = 0;
+          let openCost = 0;
+          let zeroCostOpenQty = 0;
+          let zeroCostOpenValue = 0;
+          let fallbackValue = 0;
+          let openDaysWeighted = 0;
+
+          lots.forEach((lot) => {
+            openQty += lot.qty;
+            openCost += lot.qty * lot.unitCost;
+            fallbackValue += lot.qty * (lot.marketPrice || 0);
+            if ((lot.unitCost || 0) === 0) {
+              zeroCostOpenQty += lot.qty;
+              zeroCostOpenValue += lot.qty * (lot.marketPrice || 0);
+            }
+            openDaysWeighted += Math.max((now - lot.tradeDate) / 86400000, 0) * lot.qty;
+          });
+
+          item.openQty = openQty;
+          item.openCost = openCost;
+          item.zeroCostOpenQty = zeroCostOpenQty;
+          item.zeroCostOpenValue = zeroCostOpenValue;
+          item.avgCost = openQty ? openCost / openQty : null;
+          item.openAvgDays = openQty ? openDaysWeighted / openQty : null;
+          item.closedAvgDays = item.closedHoldingQty ? item.closedHoldingWeightedDays / item.closedHoldingQty : null;
+          const candidates = getMarketSymbolCandidates(symbol);
+          item.currentPrice =
+            candidates.map((candidate) => livePrices[candidate]).find((value) => Number.isFinite(value)) ??
+            (openQty ? fallbackValue / openQty : null);
+          item.previousClose =
+            candidates.map((candidate) => livePreviousCloses[candidate]).find((value) => Number.isFinite(value)) ?? null;
+          item.openMarketValue = item.currentPrice != null ? openQty * item.currentPrice : null;
+          item.unrealizedPnl = item.openMarketValue != null ? item.openMarketValue - openCost : zeroCostOpenValue || 0;
+          item.openPnlPct = openCost ? (item.unrealizedPnl / openCost) * 100 : null;
+          item.dailyPnl =
+            item.currentPrice != null && item.previousClose != null ? (item.currentPrice - item.previousClose) * openQty : null;
+          item.totalPnl = item.realizedPnl + (item.unrealizedPnl || 0);
+          item.pnlPct = item.closedCostBasis ? (item.realizedPnl / item.closedCostBasis) * 100 : null;
+          if (item.pnlPct == null && openQty > 0 && item.unrealizedPnl > 0 && openCost === 0) {
+            item.pnlPct = 100;
+          }
+          if (item.openPnlPct == null && openQty > 0 && item.unrealizedPnl > 0 && openCost === 0) {
+            item.openPnlPct = 100;
+          }
+
+          if (openQty > 0) {
+            openRows.push({
+              symbol,
+              openQty,
+              avgCost: item.avgCost,
+              openCost,
+              currentPrice: item.currentPrice,
+              previousClose: item.previousClose,
+              openMarketValue: item.openMarketValue,
+              unrealizedPnl: item.unrealizedPnl,
+              openPnlPct: item.openPnlPct,
+              dailyPnl: item.dailyPnl,
+              openAvgDays: item.openAvgDays,
+            });
+            totals.openCost += openCost;
+            totals.openMarketValue += item.openMarketValue ?? 0;
+            if (openCost > 0) {
+              totals.costBearingOpenValueWeightedDaysTotal += (item.openMarketValue ?? 0) * (item.openAvgDays ?? 0);
+              totals.costBearingOpenMarketValue += item.openMarketValue ?? 0;
+            }
+            totals.unrealizedPnl += item.unrealizedPnl || 0;
+          }
+        }
+
+        const symbolRows = [...perSymbol.values()]
+          .map((item) => ({
+            symbol: item.symbol,
+            buyQty: item.buyQty,
+            sellQty: item.sellQty,
+            openQty: item.openQty,
+            buyAmount: item.buyAmount,
+            sellAmount: item.sellAmount,
+            realizedPnl: item.realizedPnl,
+            unrealizedPnl: item.unrealizedPnl ?? 0,
+            totalPnl: item.totalPnl ?? item.realizedPnl,
+            currentPrice: item.currentPrice,
+            pnlPct: item.pnlPct,
+            openPnlPct: item.openPnlPct,
+            closedAvgDays: item.closedAvgDays,
+            openAvgDays: item.openAvgDays,
+            avgCost: item.avgCost,
+            openCost: item.openCost,
+          }))
+          .sort((a, b) => (b.totalPnl ?? b.realizedPnl) - (a.totalPnl ?? a.realizedPnl));
+
+        totals.totalPnl = totals.realizedPnl + totals.unrealizedPnl;
+        totals.realizedPnlPct = totals.realizedCostBasis ? (totals.realizedPnl / totals.realizedCostBasis) * 100 : null;
+        totals.unrealizedPnlPct = totals.openCost ? (totals.unrealizedPnl / totals.openCost) * 100 : null;
+        totals.portfolioOpenAvgDays = totals.costBearingOpenMarketValue
+          ? totals.costBearingOpenValueWeightedDaysTotal / totals.costBearingOpenMarketValue
+          : null;
+
+        return {
+          totals,
+          symbolRows,
+          openRows: openRows.sort((a, b) => b.openCost - a.openCost),
+        };
+      }
+
+      function renderKpis(analysis) {
+        const kpis = [
+          {
+            label: "Portföy Büyüklüğü",
+            value: money(analysis.totals.openMarketValue),
+          },
+          {
+            label: "Gerçekleşen K/Z",
+            value: money(analysis.totals.realizedPnl),
+            className: analysis.totals.realizedPnl >= 0 ? "good" : "bad",
+          },
+          {
+            label: "Ort. Taşıma Gün",
+            value: daysFmt(analysis.totals.portfolioOpenAvgDays),
+          },
+          {
+            label: "Açık K/Z",
+            value: money(analysis.totals.unrealizedPnl),
+            className: analysis.totals.unrealizedPnl >= 0 ? "good" : "bad",
+          },
+          {
+            label: "Açık %K/Z",
+            value: pctFmt(analysis.totals.unrealizedPnlPct),
+            className: (analysis.totals.unrealizedPnlPct ?? 0) >= 0 ? "good" : "bad",
+          },
+        ];
+
+        els.kpiGrid.innerHTML = kpis
+          .map(
+            (item) => `
+              <div class="kpi">
+                <span class="kpi-label">${item.label}</span>
+                <div class="kpi-value ${item.className || ""}">${item.value}</div>
+                <div class="kpi-note">${item.note || ""}</div>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderSummaryTable(rows) {
+        if (!rows.length) {
+          els.summaryTableBody.innerHTML = `<tr><td colspan="14"><div class="empty">Henuz islem yok.</div></td></tr>`;
+          return;
+        }
+        els.summaryTableBody.innerHTML = rows
+          .map(
+            (row) => `
+              <tr>
+                <td>${row.symbol}</td>
+                <td class="num">${numberFmt(row.buyQty, 0)}</td>
+                <td class="num">${numberFmt(row.sellQty, 0)}</td>
+                <td class="num">${numberFmt(row.openQty, 0)}</td>
+                <td class="num">${money(row.currentPrice)}</td>
+                <td class="num">${money(row.buyAmount)}</td>
+                <td class="num">${money(row.sellAmount)}</td>
+                <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
+                <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
+                <td class="num ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
+                <td class="num">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
+                <td class="num">${daysFmt(row.closedAvgDays)}</td>
+                <td class="num">${daysFmt(row.openAvgDays)}</td>
+                <td class="num">${money(row.avgCost)}</td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderOpenTable(rows) {
+        if (!rows.length) {
+          els.openTableBody.innerHTML = `<tr><td colspan="9"><div class="empty">Açık pozisyon yok.</div></td></tr>`;
+          return;
+        }
+        els.openTableBody.innerHTML = rows
+          .map(
+            (row) => `
+              <tr>
+                <td>${row.symbol}</td>
+                <td class="num">${numberFmt(row.openQty, 0)}</td>
+                <td class="num">${money(row.currentPrice)}</td>
+                <td class="num">${money(row.avgCost)}</td>
+                <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
+                <td class="num">${pctFmt(row.openPnlPct)}</td>
+                <td class="num ${row.dailyPnl == null ? "" : row.dailyPnl >= 0 ? "good" : "bad"}">${money(row.dailyPnl)}</td>
+                <td class="num">${money(row.openCost)}</td>
+                <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderHistoryTable(transactions) {
+        if (!transactions.length) {
+          els.historyTableBody.innerHTML = `<tr><td colspan="9"><div class="empty">Henuz kayit yok.</div></td></tr>`;
+          return;
+        }
+
+        const rows = [...transactions].sort((a, b) => new Date(b.tradeDate) - new Date(a.tradeDate));
+        els.historyTableBody.innerHTML = rows
+          .map(
+            (tx) => `
+              <tr>
+                <td>${new Date(tx.tradeDate).toLocaleDateString("tr-TR")}</td>
+                <td>${tx.symbol || "-"}</td>
+                <td>${tx.type}</td>
+                <td class="num">${numberFmt(tx.quantity, 0)}</td>
+                <td class="num">${(tx.referencePrice ?? tx.price) != null ? numberFmt(tx.referencePrice ?? tx.price, 4) : "-"}</td>
+                <td>${tx.zeroCost ? "Evet" : "-"}</td>
+                <td class="num">${money(tx.tax || 0)}</td>
+                <td class="num">${money(tx._computedAmount)}</td>
+                <td class="num">
+                  <div class="inline-actions">
+                    <button class="ghost" onclick="editTransaction('${tx.id}')">Duzenle</button>
+                    <button class="warn" onclick="deleteTransaction('${tx.id}')">Sil</button>
+                  </div>
+                </td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderAll() {
+        const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
+        const effectivePreviousCloses = { ...snapshotPreviousCloses, ...state.livePreviousCloses };
+        const analysis = analyzePortfolio(state.data.transactions, state.livePrices, effectivePreviousCloses);
+        renderKpis(analysis);
+        renderSummaryTable(analysis.symbolRows);
+        renderOpenTable(analysis.openRows);
+        renderHistoryTable(state.data.transactions);
+
+        const updatedText = state.data.updatedAt
+          ? `Son kayit: ${new Date(state.data.updatedAt).toLocaleString("tr-TR")}`
+          : "Henüz Dropbox'a yazilmadi.";
+        const priceText = state.livePriceStatus === "ready"
+          ? " | Güncel fiyatlar yüklendi"
+          : state.livePriceStatus === "loading"
+            ? " | Güncel fiyatlar yükleniyor"
+            : state.livePriceStatus === "error"
+              ? " | Güncel fiyat alınamadı"
+              : "";
+        els.summaryMeta.textContent = `${updatedText} | Açık pozisyon sayısı: ${analysis.openRows.length}${priceText}`;
+        els.recordCountChip.textContent = `${state.data.transactions.length} kayit`;
+      }
+
+      async function refreshPricesAndRender() {
+        const symbols = [...new Set(state.data.transactions.map((tx) => (tx.symbol || "").toUpperCase()).filter(Boolean))];
+        renderAll();
+        await loadLivePrices(symbols);
+        renderAll();
+      }
+
+      function resetForm() {
+        els.txForm.reset();
+        els.txId.value = "";
+        els.dateInput.value = nowLocalInputValue();
+        els.typeInput.value = "BUY";
+        els.zeroCostInput.checked = false;
+        els.rememberDropbox.checked = state.rememberDropbox;
+        els.appKeyInput.value = state.appKey;
+      }
+
+      function buildTransactionFromForm() {
+        const type = els.typeInput.value.toUpperCase();
+        const tx = {
+          id: els.txId.value || generateId(),
+          symbol: els.symbolInput.value.trim().toUpperCase(),
+          type,
+          quantity: toNumber(els.qtyInput.value) ?? 0,
+          price: toNumber(els.priceInput.value),
+          referencePrice: toNumber(els.priceInput.value),
+          zeroCost: els.zeroCostInput.checked,
+          commission: 0,
+          tax: 0,
+          amount: null,
+          tradeDate: els.dateInput.value ? new Date(`${els.dateInput.value}T00:00:00`).toISOString() : new Date().toISOString(),
+          note: "",
+        };
+
+        if (!tx.symbol || !tx.quantity || tx.price == null) {
+          throw new Error("ALIS/SATIS icin hisse, lot ve fiyat gerekli.");
+        }
+
+        return tx;
+      }
+
+      async function saveTransaction(event) {
+        event.preventDefault();
+        try {
+          const tx = buildTransactionFromForm();
+          const idx = state.data.transactions.findIndex((item) => item.id === tx.id);
+          if (idx >= 0) {
+            state.data.transactions[idx] = tx;
+          } else {
+            state.data.transactions.push(tx);
+          }
+          state.data.transactions.sort((a, b) => new Date(a.tradeDate) - new Date(b.tradeDate));
+          state.data.updatedAt = new Date().toISOString();
+          persistLocalData();
+          await refreshPricesAndRender();
+          resetForm();
+          setStatus(`İşlem kaydedildi.\nDropbox'a yazılıyor...\nToplam kayıt: ${state.data.transactions.length}`, "ok");
+          try {
+            await writeDropboxFile(true);
+          } catch (writeError) {
+            setStatus(
+              `İşlem yerelde kaydedildi ama Dropbox'a yazılamadı.\nToplam kayıt: ${state.data.transactions.length}\n${String(writeError)}`,
+              "err"
+            );
+          }
+        } catch (error) {
+          setStatus(`İşlem kaydedilemedi.\n${String(error)}`, "err");
+        }
+      }
+
+      window.editTransaction = function editTransaction(id) {
+        const tx = state.data.transactions.find((item) => item.id === id);
+        if (!tx) return;
+        els.txId.value = tx.id;
+        els.symbolInput.value = tx.symbol || "";
+        els.typeInput.value = tx.type || "BUY";
+        els.qtyInput.value = tx.quantity ?? "";
+        els.priceInput.value = tx.referencePrice ?? tx.price ?? "";
+        els.zeroCostInput.checked = Boolean(tx.zeroCost);
+        const dt = new Date(tx.tradeDate);
+        const tzOffset = dt.getTimezoneOffset() * 60000;
+        els.dateInput.value = new Date(dt.getTime() - tzOffset).toISOString().slice(0, 10);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setStatus(`İşlem düzenleme için forma alındı.\nID: ${tx.id}`, "warn");
+      };
+
+      window.deleteTransaction = async function deleteTransaction(id) {
+        const tx = state.data.transactions.find((item) => item.id === id);
+        if (!tx) return;
+        if (!confirm(`${tx.symbol || "-"} kaydini silmek istiyor musunuz?`)) return;
+        state.data.transactions = state.data.transactions.filter((item) => item.id !== id);
+        state.data.updatedAt = new Date().toISOString();
+        persistLocalData();
+        await refreshPricesAndRender();
+        setStatus(`Kayit silindi.\nDropbox'a yaziliyor...\nKalan kayit: ${state.data.transactions.length}`, "ok");
+        try {
+          await writeDropboxFile(true);
+        } catch (writeError) {
+          setStatus(
+            `Kayit yerelde silindi ama Dropbox'a yazilamadi.\nKalan kayit: ${state.data.transactions.length}\n${String(writeError)}`,
+            "err"
+          );
+        }
+      };
+
+      function bindEvents() {
+        document.getElementById("btnResetForm").addEventListener("click", resetForm);
+        els.btnConnectDropbox.addEventListener("click", connectDropbox);
+        els.btnDisconnectDropbox.addEventListener("click", disconnectDropbox);
+        els.txForm.addEventListener("submit", saveTransaction);
+        els.appKeyInput.addEventListener("input", () => {
+          state.appKey = els.appKeyInput.value.trim();
+          localStorage.setItem(STORAGE_KEYS.appKey, state.appKey);
+        });
+        els.rememberDropbox.addEventListener("change", persistSettings);
+      }
+
+      async function init() {
+        loadLocalState();
+        bindEvents();
+        updateConnectionBadge();
+        await refreshPricesAndRender();
+        await handleOAuthRedirect();
+        if (state.refreshToken || state.accessToken) {
+          await fetchAccount().catch(() => {});
+          await maybeAutoLoadDropbox(false);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
