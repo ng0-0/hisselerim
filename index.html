@@ -1521,6 +1521,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           unrealizedPnl: 0,
           unrealizedPnlPct: null,
           totalPnl: 0,
+          totalPnlPct: null,
           openCost: 0,
           openMarketValue: 0,
           costBearingOpenValueWeightedDaysTotal: 0,
@@ -1717,6 +1718,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         totals.totalPnl = totals.realizedPnl + totals.unrealizedPnl;
         totals.realizedPnlPct = totals.realizedCostBasis ? (totals.realizedPnl / totals.realizedCostBasis) * 100 : null;
         totals.unrealizedPnlPct = totals.openCost ? (totals.unrealizedPnl / totals.openCost) * 100 : null;
+        totals.totalPnlPct = totals.realizedCostBasis + totals.openCost
+          ? (totals.totalPnl / (totals.realizedCostBasis + totals.openCost)) * 100
+          : null;
         totals.portfolioOpenAvgDays = totals.costBearingOpenMarketValue
           ? totals.costBearingOpenValueWeightedDaysTotal / totals.costBearingOpenMarketValue
           : null;
@@ -1752,6 +1756,11 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             label: "Açık %K/Z",
             value: pctFmt(analysis.totals.unrealizedPnlPct),
             className: (analysis.totals.unrealizedPnlPct ?? 0) >= 0 ? "good" : "bad",
+          },
+          {
+            label: "Toplam %K/Z",
+            value: pctFmt(analysis.totals.totalPnlPct),
+            className: (analysis.totals.totalPnlPct ?? 0) >= 0 ? "good" : "bad",
           },
         ];
 
