@@ -40,6 +40,10 @@
         padding: 0 14px;
       }
 
+      .wrap.compact-tables .detail-col {
+        display: none;
+      }
+
       .hero,
       .panel,
       .kpi,
@@ -416,6 +420,10 @@
         font-weight: 700;
       }
 
+      .table-mode-toggle {
+        white-space: nowrap;
+      }
+
       .empty {
         border: 1px dashed var(--line);
         border-radius: 18px;
@@ -621,7 +629,10 @@
                 <h2 style="margin-bottom:4px;">Portföy Özeti</h2>
                 <small id="summaryMeta">Veri bekleniyor.</small>
               </div>
-              <span class="chip" id="recordCountChip">0 kayit</span>
+              <div class="actions">
+                <button type="button" id="btnToggleTableMode" class="ghost table-mode-toggle">Detaylı Görünüm</button>
+                <span class="chip" id="recordCountChip">0 kayit</span>
+              </div>
             </div>
             <div class="kpi-grid" id="kpiGrid"></div>
           </section>
@@ -639,19 +650,19 @@
                   <thead>
                     <tr>
                       <th>Hisse</th>
-                      <th class="num">Alış Lot</th>
-                      <th class="num">Satış Lot</th>
+                      <th class="num detail-col">Alış Lot</th>
+                      <th class="num detail-col">Satış Lot</th>
                       <th class="num">Açık Lot</th>
                       <th class="num">Güncel Fiyat</th>
-                      <th class="num">Alış Tutar</th>
-                      <th class="num">Satış Tutar</th>
-                      <th class="num">Gerç. K/Z</th>
+                      <th class="num detail-col">Alış Tutar</th>
+                      <th class="num detail-col">Satış Tutar</th>
+                      <th class="num detail-col">Gerç. K/Z</th>
                       <th class="num">Açık K/Z</th>
                       <th class="num">Toplam K/Z</th>
                       <th class="num">K/Z %</th>
-                      <th class="num">Kapalı Ort. Gün</th>
-                      <th class="num">Açık Ort. Gün</th>
-                      <th class="num">Ort. Maliyet</th>
+                      <th class="num detail-col">Kapalı Ort. Gün</th>
+                      <th class="num detail-col">Açık Ort. Gün</th>
+                      <th class="num detail-col">Ort. Maliyet</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -673,11 +684,11 @@
                       <th>Hisse</th>
                       <th class="num">Açık Lot</th>
                       <th class="num">Güncel Fiyat</th>
-                      <th class="num">Ort. Maliyet</th>
+                      <th class="num detail-col">Ort. Maliyet</th>
                       <th class="num">Açık K/Z</th>
                       <th class="num">K/Z %</th>
-                      <th class="num">Toplam Maliyet</th>
-                      <th class="num">Ort. Gün</th>
+                      <th class="num detail-col">Toplam Maliyet</th>
+                      <th class="num detail-col">Ort. Gün</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -701,9 +712,9 @@
                       <th>Tur</th>
                       <th class="num">Lot</th>
                       <th class="num">Fiyat</th>
-                      <th>0 Maliyet</th>
-                      <th class="num">Vergi</th>
-                      <th class="num">Net Tutar</th>
+                      <th class="detail-col">0 Maliyet</th>
+                      <th class="num detail-col">Vergi</th>
+                      <th class="num detail-col">Net Tutar</th>
                       <th class="num">İşlem</th>
                     </tr>
                   </thead>
@@ -768,6 +779,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         livePreviousCloses: {},
         livePriceStatus: "idle",
         lastPriceKey: "",
+        compactTableMode: true,
         data: {
           schemaVersion: 1,
           updatedAt: null,
@@ -778,6 +790,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       const els = {
         mainLayout: document.getElementById("mainLayout"),
         btnToggleSidebar: document.getElementById("btnToggleSidebar"),
+        btnToggleTableMode: document.getElementById("btnToggleTableMode"),
         appKeyInput: document.getElementById("appKeyInput"),
         rememberDropbox: document.getElementById("rememberDropbox"),
         btnConnectDropbox: document.getElementById("btnConnectDropbox"),
@@ -1757,19 +1770,19 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             (row) => `
               <tr>
                 <td>${row.symbol}</td>
-                <td class="num">${numberFmt(row.buyQty, 0)}</td>
-                <td class="num">${numberFmt(row.sellQty, 0)}</td>
+                <td class="num detail-col">${numberFmt(row.buyQty, 0)}</td>
+                <td class="num detail-col">${numberFmt(row.sellQty, 0)}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
                 <td class="num">${money(row.currentPrice)}</td>
-                <td class="num">${money(row.buyAmount)}</td>
-                <td class="num">${money(row.sellAmount)}</td>
-                <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
+                <td class="num detail-col">${money(row.buyAmount)}</td>
+                <td class="num detail-col">${money(row.sellAmount)}</td>
+                <td class="num detail-col ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
                 <td class="num">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
-                <td class="num">${daysFmt(row.closedAvgDays)}</td>
-                <td class="num">${daysFmt(row.openAvgDays)}</td>
-                <td class="num">${money(row.avgCost)}</td>
+                <td class="num detail-col">${daysFmt(row.closedAvgDays)}</td>
+                <td class="num detail-col">${daysFmt(row.openAvgDays)}</td>
+                <td class="num detail-col">${money(row.avgCost)}</td>
               </tr>
             `
           )
@@ -1788,11 +1801,11 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td>${row.symbol}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
                 <td class="num">${money(row.currentPrice)}</td>
-                <td class="num">${money(row.avgCost)}</td>
+                <td class="num detail-col">${money(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num">${pctFmt(row.openPnlPct)}</td>
-                <td class="num">${money(row.openCost)}</td>
-                <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
+                <td class="num detail-col">${money(row.openCost)}</td>
+                <td class="num detail-col">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
               </tr>
             `
           )
@@ -1815,9 +1828,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td>${tx.type}</td>
                 <td class="num">${numberFmt(tx.quantity, 0)}</td>
                 <td class="num">${(tx.referencePrice ?? tx.price) != null ? numberFmt(tx.referencePrice ?? tx.price, 4) : "-"}</td>
-                <td>${tx.zeroCost ? "Evet" : "-"}</td>
-                <td class="num">${money(tx.tax || 0)}</td>
-                <td class="num">${money(tx._computedAmount)}</td>
+                <td class="detail-col">${tx.zeroCost ? "Evet" : "-"}</td>
+                <td class="num detail-col">${money(tx.tax || 0)}</td>
+                <td class="num detail-col">${money(tx._computedAmount)}</td>
                 <td class="num">
                   <div class="inline-actions">
                     <button class="ghost" onclick="editTransaction('${tx.id}')">Duzenle</button>
@@ -1981,9 +1994,20 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         updateSidebarToggle();
       }
 
+      function updateTableMode() {
+        document.querySelector(".wrap").classList.toggle("compact-tables", state.compactTableMode);
+        els.btnToggleTableMode.textContent = state.compactTableMode ? "Detaylı Görünüm" : "Genel Görünüm";
+      }
+
+      function toggleTableMode() {
+        state.compactTableMode = !state.compactTableMode;
+        updateTableMode();
+      }
+
       function bindEvents() {
         document.getElementById("btnResetForm").addEventListener("click", resetForm);
         els.btnToggleSidebar.addEventListener("click", toggleSidebar);
+        els.btnToggleTableMode.addEventListener("click", toggleTableMode);
         els.btnConnectDropbox.addEventListener("click", connectDropbox);
         els.btnDisconnectDropbox.addEventListener("click", disconnectDropbox);
         els.txForm.addEventListener("submit", saveTransaction);
@@ -1997,6 +2021,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       async function init() {
         loadLocalState();
         updateSidebarToggle();
+        updateTableMode();
         bindEvents();
         updateConnectionBadge();
         await refreshPricesAndRender();
