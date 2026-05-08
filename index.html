@@ -846,7 +846,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       function pctFmt(value) {
         if (value == null || Number.isNaN(value)) return "-";
-        return `%${value.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+        return `%${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
 
       function toNumber(value) {
