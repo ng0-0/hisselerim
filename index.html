@@ -1941,7 +1941,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num detail-col ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
-                <td class="num">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
+                <td class="num ${((row.pnlPct ?? row.openPnlPct) ?? 0) >= 0 ? "good" : "bad"}">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
                 <td class="num detail-col">${daysFmt(row.closedAvgDays)}</td>
                 <td class="num detail-col">${daysFmt(row.openAvgDays)}</td>
                 <td class="num detail-col">${money(row.avgCost)}</td>
@@ -1965,8 +1965,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num detail-col">${money(row.currentPrice)}</td>
                 <td class="num detail-col">${money(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
-                <td class="num">${pctFmt(row.openPnlPct)}</td>
-                <td class="num detail-col">${money(row.dailyPnl)}</td>
+                <td class="num ${(row.openPnlPct ?? 0) >= 0 ? "good" : "bad"}">${pctFmt(row.openPnlPct)}</td>
+                <td class="num detail-col ${(row.dailyPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.dailyPnl)}</td>
                 <td class="num">${money(row.openCost)}</td>
                 <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
               </tr>
