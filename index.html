@@ -1881,6 +1881,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           className: (amount ?? 0) >= 0 ? "good" : "bad",
           htmlValue: true,
         });
+        const portfolioSizedRealizedPct = analysis.totals.openMarketValue
+          ? (analysis.totals.realizedPnl / analysis.totals.openMarketValue) * 100
+          : null;
 
         const kpis = [
           {
@@ -1900,12 +1903,12 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             ...pnlDisplay(analysis.totals.unrealizedPnl, analysis.totals.unrealizedPnlPct),
           },
           {
-            label: "Toplam K/Z",
-            ...pnlDisplay(analysis.totals.totalPnl, analysis.totals.totalPnlPct),
+            label: "Gerçekleşen K/Z",
+            ...pnlDisplay(analysis.totals.realizedPnl, portfolioSizedRealizedPct),
           },
           {
-            label: "Gerçekleşen K/Z",
-            ...pnlDisplay(analysis.totals.realizedPnl, analysis.totals.realizedPnlPct),
+            label: "Toplam K/Z",
+            ...pnlDisplay(analysis.totals.totalPnl, analysis.totals.totalPnlPct),
           },
         ];
 
