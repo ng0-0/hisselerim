@@ -61,101 +61,6 @@
 
       .wrap.compact-tables table {
         min-width: 100%;
-        table-layout: fixed;
-      }
-
-      .wrap.compact-tables th,
-      .wrap.compact-tables td {
-        padding: 9px 6px;
-        font-size: 12px;
-      }
-
-      .wrap.compact-tables td:not(:first-child) {
-        white-space: nowrap;
-      }
-
-      .wrap.compact-tables th {
-        white-space: normal;
-        line-height: 1.15;
-        word-break: break-word;
-      }
-
-      .wrap.compact-tables td:first-child,
-      .wrap.compact-tables td:not(:first-child) {
-        word-break: normal;
-      }
-
-      .wrap.compact-tables #openTable {
-        min-width: 0;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(1),
-      .wrap.compact-tables #openTable td:nth-child(1) {
-        width: 74px;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(2),
-      .wrap.compact-tables #openTable td:nth-child(2) {
-        width: 54px;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(3),
-      .wrap.compact-tables #openTable td:nth-child(3) {
-        width: 72px;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(4),
-      .wrap.compact-tables #openTable td:nth-child(4) {
-        width: 58px;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(5),
-      .wrap.compact-tables #openTable td:nth-child(5) {
-        width: 84px;
-      }
-
-      .wrap.compact-tables #openTable th:nth-child(6),
-      .wrap.compact-tables #openTable td:nth-child(6) {
-        width: 52px;
-      }
-
-      .wrap.compact-tables #summaryTable {
-        min-width: 0;
-      }
-
-      .wrap.compact-tables #summaryTable th:nth-child(1),
-      .wrap.compact-tables #summaryTable td:nth-child(1) {
-        width: 70px;
-      }
-
-      .wrap.compact-tables #summaryTable th:nth-child(2),
-      .wrap.compact-tables #summaryTable td:nth-child(2),
-      .wrap.compact-tables #summaryTable th:nth-child(3),
-      .wrap.compact-tables #summaryTable td:nth-child(3),
-      .wrap.compact-tables #summaryTable th:nth-child(4),
-      .wrap.compact-tables #summaryTable td:nth-child(4) {
-        width: 50px;
-      }
-
-      .wrap.compact-tables #summaryTable th:nth-child(5),
-      .wrap.compact-tables #summaryTable td:nth-child(5),
-      .wrap.compact-tables #summaryTable th:nth-child(6),
-      .wrap.compact-tables #summaryTable td:nth-child(6) {
-        width: 76px;
-      }
-
-      .wrap.compact-tables #summaryTable th:nth-child(7),
-      .wrap.compact-tables #summaryTable td:nth-child(7) {
-        width: 60px;
-      }
-
-      .wrap.compact-tables #openTable td:nth-child(3),
-      .wrap.compact-tables #openTable td:nth-child(5),
-      .wrap.compact-tables #summaryTable td:nth-child(5),
-      .wrap.compact-tables #summaryTable td:nth-child(6) {
-        white-space: normal;
-        line-height: 1.15;
-        word-break: break-word;
       }
 
       .hero,
@@ -518,25 +423,6 @@
         text-align: right;
       }
 
-      .col-lot {
-        width: 74px;
-        white-space: nowrap;
-      }
-
-      .col-pct {
-        width: 82px;
-        white-space: nowrap;
-      }
-
-      .col-money-tight {
-        width: 104px;
-      }
-
-      .col-days {
-        width: 68px;
-        white-space: nowrap;
-      }
-
       tbody tr:nth-child(even) td {
         background: rgba(45, 51, 59, 0.86);
       }
@@ -803,16 +689,16 @@
                   <thead>
                     <tr>
                       <th>Hisse</th>
-                      <th class="num col-lot">Alış Lot</th>
-                      <th class="num col-lot">Satış Lot</th>
-                      <th class="num col-lot">Açık<br>Lot</th>
+                      <th class="num">Alış Lot</th>
+                      <th class="num">Satış Lot</th>
+                      <th class="num">Açık Lot</th>
                       <th class="num detail-col">Güncel Fiyat</th>
                       <th class="num detail-col">Alış Tutar</th>
                       <th class="num detail-col">Satış Tutar</th>
-                      <th class="num col-money-tight">Gerç. K/Z</th>
-                      <th class="num col-money-tight">Açık K/Z</th>
+                      <th class="num">Gerç. K/Z</th>
+                      <th class="num">Açık K/Z</th>
                       <th class="num detail-col">Toplam K/Z</th>
-                      <th class="num col-pct">K/Z %</th>
+                      <th class="num">K/Z %</th>
                       <th class="num detail-col">Kapalı Ort. Gün</th>
                       <th class="num detail-col">Açık Ort. Gün</th>
                       <th class="num detail-col">Ort. Maliyet</th>
@@ -835,13 +721,13 @@
                   <thead>
                     <tr>
                       <th>Hisse</th>
-                      <th class="num col-lot">Açık Lot</th>
+                      <th class="num">Açık Lot</th>
                       <th class="num detail-col">Güncel Fiyat</th>
                       <th class="num detail-col">Ort. Maliyet</th>
-                      <th class="num col-money-tight">Açık K/Z</th>
-                      <th class="num col-pct">K/Z %</th>
-                      <th class="num col-money-tight">Toplam<br>Maliyet</th>
-                      <th class="num col-days">Ort.<br>Gün</th>
+                      <th class="num">Açık K/Z</th>
+                      <th class="num">K/Z %</th>
+                      <th class="num">Toplam Maliyet</th>
+                      <th class="num">Ort. Gün</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -863,8 +749,8 @@
                       <th>Tarih</th>
                       <th>Hisse</th>
                       <th>Tur</th>
-                      <th class="num col-lot">Lot</th>
-                      <th class="num col-money-tight">Fiyat</th>
+                      <th class="num">Lot</th>
+                      <th class="num">Fiyat</th>
                       <th class="detail-col">0 Maliyet</th>
                       <th class="num detail-col">Vergi</th>
                       <th class="num detail-col">Net Tutar</th>
@@ -1936,16 +1822,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             (row) => `
               <tr>
                 <td>${row.symbol}</td>
-                <td class="num col-lot">${numberFmt(row.buyQty, 0)}</td>
-                <td class="num col-lot">${numberFmt(row.sellQty, 0)}</td>
-                <td class="num col-lot">${numberFmt(row.openQty, 0)}</td>
+                <td class="num">${numberFmt(row.buyQty, 0)}</td>
+                <td class="num">${numberFmt(row.sellQty, 0)}</td>
+                <td class="num">${numberFmt(row.openQty, 0)}</td>
                 <td class="num detail-col">${money(row.currentPrice)}</td>
                 <td class="num detail-col">${money(row.buyAmount)}</td>
                 <td class="num detail-col">${money(row.sellAmount)}</td>
-                <td class="num col-money-tight ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
-                <td class="num col-money-tight ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
+                <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
+                <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num detail-col ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
-                <td class="num col-pct">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
+                <td class="num">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
                 <td class="num detail-col">${daysFmt(row.closedAvgDays)}</td>
                 <td class="num detail-col">${daysFmt(row.openAvgDays)}</td>
                 <td class="num detail-col">${money(row.avgCost)}</td>
@@ -1965,13 +1851,13 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             (row) => `
               <tr>
                 <td>${row.symbol}</td>
-                <td class="num col-lot">${numberFmt(row.openQty, 0)}</td>
+                <td class="num">${numberFmt(row.openQty, 0)}</td>
                 <td class="num detail-col">${money(row.currentPrice)}</td>
                 <td class="num detail-col">${money(row.avgCost)}</td>
-                <td class="num col-money-tight ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
-                <td class="num col-pct">${pctFmt(row.openPnlPct)}</td>
-                <td class="num col-money-tight">${money(row.openCost)}</td>
-                <td class="num col-days">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
+                <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
+                <td class="num">${pctFmt(row.openPnlPct)}</td>
+                <td class="num">${money(row.openCost)}</td>
+                <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
               </tr>
             `
           )
@@ -1992,8 +1878,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td>${new Date(tx.tradeDate).toLocaleDateString("tr-TR")}</td>
                 <td>${tx.symbol || "-"}</td>
                 <td>${tx.type}</td>
-                <td class="num col-lot">${numberFmt(tx.quantity, 0)}</td>
-                <td class="num col-money-tight">${(tx.referencePrice ?? tx.price) != null ? numberFmt(tx.referencePrice ?? tx.price, 2) : "-"}</td>
+                <td class="num">${numberFmt(tx.quantity, 0)}</td>
+                <td class="num">${(tx.referencePrice ?? tx.price) != null ? numberFmt(tx.referencePrice ?? tx.price, 2) : "-"}</td>
                 <td class="detail-col">${tx.zeroCost ? "Evet" : "-"}</td>
                 <td class="num detail-col">${money(tx.tax || 0)}</td>
                 <td class="num detail-col">${money(tx._computedAmount)}</td>
