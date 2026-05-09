@@ -35,9 +35,21 @@
       }
 
       .wrap {
-        max-width: 1380px;
-        margin: 28px auto 44px;
-        padding: 0 18px;
+        max-width: 540px;
+        margin: 12px auto 28px;
+        padding: 0 14px;
+      }
+
+      .wrap.compact-tables .detail-col {
+        display: none;
+      }
+
+      .wrap.detailed-tables {
+        max-width: 1280px;
+      }
+
+      .wrap.compact-tables table {
+        min-width: 100%;
       }
 
       .hero,
@@ -51,21 +63,21 @@
       .hero {
         background: linear-gradient(135deg, rgba(44, 50, 57, 0.96), rgba(34, 39, 45, 0.94));
         border: 1px solid var(--line);
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
       }
 
       .hero-top {
         display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
       }
 
       h1 {
-        margin: 0 0 10px;
-        font-size: 34px;
+        margin: 0;
+        font-size: 24px;
         line-height: 1.1;
       }
 
@@ -80,13 +92,14 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 10px 14px;
+        padding: 9px 13px;
         border-radius: 999px;
         border: 1px solid var(--line);
         background: rgba(56, 64, 73, 0.95);
         color: var(--accent-2);
         font-size: 13px;
         font-weight: 600;
+        align-self: flex-start;
       }
 
       .top-actions,
@@ -103,27 +116,84 @@
 
       .layout {
         display: grid;
-        grid-template-columns: 360px minmax(0, 1fr);
-        gap: 18px;
-        margin-top: 18px;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .layout.compact {
+        grid-template-columns: 1fr;
       }
 
       .right-column {
         display: grid;
-        gap: 18px;
+        gap: 12px;
+      }
+
+      .side-panel {
+        overflow: hidden;
+      }
+
+      .side-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .side-header h2 {
+        margin: 0;
+        line-height: 1.05;
+      }
+
+      .side-toggle {
+        padding: 10px 14px;
+        font-size: 13px;
+        min-width: 0;
+      }
+
+      .side-body {
+        display: grid;
+        gap: 0;
+      }
+
+      .layout.compact .side-panel {
+        padding: 12px;
+      }
+
+      .layout.compact .side-header {
+        margin-bottom: 0;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      .layout.compact .side-header h2 {
+        display: none;
+      }
+
+      .layout.compact .side-body {
+        display: none;
+      }
+
+      .layout.compact .side-toggle {
+        width: auto;
+        padding: 12px 16px;
+        border-radius: 12px;
       }
 
       .panel {
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 22px;
-        padding: 18px;
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
       }
 
       .panel h2 {
-        margin: 0 0 12px;
-        font-size: 20px;
+        margin: 0 0 10px;
+        font-size: 17px;
       }
 
       .panel p {
@@ -182,8 +252,8 @@
 
       button {
         border: 0;
-        border-radius: 999px;
-        padding: 12px 18px;
+        border-radius: 10px;
+        padding: 12px 16px;
         font: inherit;
         font-weight: 700;
         cursor: pointer;
@@ -245,14 +315,14 @@
 
       .kpi-grid {
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
       }
 
       .kpi {
         border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 16px;
+        border-radius: 12px;
+        padding: 14px;
         background: var(--card-2);
       }
 
@@ -266,7 +336,7 @@
       }
 
       .kpi-value {
-        font-size: 25px;
+        font-size: 20px;
         font-weight: 800;
       }
 
@@ -286,7 +356,7 @@
 
       .tables {
         display: grid;
-        gap: 18px;
+        gap: 12px;
       }
 
       .tables > div:nth-child(1) {
@@ -304,21 +374,21 @@
       .table-wrap {
         overflow: auto;
         border: 1px solid var(--line);
-        border-radius: 18px;
+        border-radius: 12px;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 920px;
+        min-width: 820px;
       }
 
       th,
       td {
-        padding: 12px 12px;
+        padding: 10px 10px;
         border-bottom: 1px solid var(--line);
         text-align: left;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       th {
@@ -345,9 +415,9 @@
       .toolbar {
         display: flex;
         justify-content: space-between;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
       }
 
       .toolbar small {
@@ -357,12 +427,16 @@
       .chip {
         display: inline-flex;
         align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
+        padding: 6px 9px;
+        border-radius: 10px;
         background: rgba(59, 130, 246, 0.18);
         color: var(--accent-2);
         font-size: 12px;
         font-weight: 700;
+      }
+
+      .table-mode-toggle {
+        white-space: nowrap;
       }
 
       .empty {
@@ -381,22 +455,30 @@
       }
 
       .status-panel {
-        margin-top: 18px;
+        margin-top: 12px;
+      }
+
+      .status-footer {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .status-toolbar {
+        display: grid;
+        grid-template-columns: minmax(180px, 260px) auto auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .status-toolbar .remember {
+        margin: 0;
       }
 
       .inline-actions button {
         padding: 8px 12px;
         font-size: 12px;
-      }
-
-      @media (max-width: 1180px) {
-        .layout {
-          grid-template-columns: 1fr;
-        }
-
-        .kpi-grid {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
       }
 
       @media (max-width: 760px) {
@@ -411,33 +493,32 @@
         }
 
         .two-col,
-        .three-col,
-        .kpi-grid {
+        .three-col {
           grid-template-columns: 1fr;
         }
 
         .wrap {
-          margin: 14px auto 28px;
+          margin: 10px auto 22px;
           padding: 0 10px;
         }
 
         .hero {
-          padding: 18px;
-          border-radius: 20px;
+          padding: 14px;
+          border-radius: 14px;
         }
 
         h1 {
-          font-size: 28px;
+          font-size: 22px;
           margin-bottom: 0;
         }
 
         .panel {
-          padding: 14px;
-          border-radius: 18px;
+          padding: 12px;
+          border-radius: 14px;
         }
 
         .panel h2 {
-          font-size: 18px;
+          font-size: 17px;
           margin-bottom: 10px;
         }
 
@@ -453,8 +534,12 @@
           font-size: 14px;
         }
 
+        .kpi-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         .kpi {
-          padding: 14px;
+          padding: 13px;
           border-radius: 16px;
         }
 
@@ -468,7 +553,7 @@
         }
 
         table {
-          min-width: 760px;
+          min-width: 680px;
         }
 
         th,
@@ -489,6 +574,10 @@
         .status-panel {
           margin-bottom: 10px;
         }
+
+        .status-toolbar {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -499,30 +588,17 @@
           <div>
             <h1>Hisse Portföy Takip</h1>
           </div>
-          <div class="badge" id="connectionBadge">Dropbox bagli degil</div>
         </div>
       </section>
 
-      <div class="layout">
-        <aside class="panel">
-          <h2>Dropbox Baglantisi</h2>
-          <div class="form-grid">
-            <div>
-              <label for="appKeyInput">Dropbox App Key</label>
-              <input id="appKeyInput" type="text" placeholder="Dropbox app key" />
-            </div>
-            <label class="remember">
-              <input id="rememberDropbox" type="checkbox" checked />
-              Dropbox baglantisini hatirla
-            </label>
-            <div class="actions">
-              <button type="button" id="btnConnectDropbox">Dropbox ile Baglan</button>
-              <button type="button" id="btnDisconnectDropbox" class="ghost">Baglantiyi Kaldir</button>
-            </div>
+      <div class="layout compact" id="mainLayout">
+        <aside class="panel side-panel">
+          <div class="side-header">
+            <h2>İşlem Girişi</h2>
+            <button type="button" id="btnToggleSidebar" class="side-toggle">+ Yeni İşlem Ekle</button>
           </div>
 
-          <h2 style="margin-top:18px;">İşlem Girişi</h2>
-
+          <div class="side-body">
           <form id="txForm" class="form-grid">
             <input id="txId" type="hidden" />
             <div class="two-col">
@@ -565,6 +641,8 @@
               <button type="button" id="btnResetForm" class="ghost">Formu Temizle</button>
             </div>
           </form>
+          </div>
+
         </aside>
 
         <main class="right-column">
@@ -574,7 +652,10 @@
                 <h2 style="margin-bottom:4px;">Portföy Özeti</h2>
                 <small id="summaryMeta">Veri bekleniyor.</small>
               </div>
-              <span class="chip" id="recordCountChip">0 kayit</span>
+              <div class="actions">
+                <button type="button" id="btnToggleTableMode" class="ghost table-mode-toggle">Detaylı Görünüm</button>
+                <span class="chip" id="recordCountChip">0 kayit</span>
+              </div>
             </div>
             <div class="kpi-grid" id="kpiGrid"></div>
           </section>
@@ -595,16 +676,16 @@
                       <th class="num">Alış Lot</th>
                       <th class="num">Satış Lot</th>
                       <th class="num">Açık Lot</th>
-                      <th class="num">Güncel Fiyat</th>
-                      <th class="num">Alış Tutar</th>
-                      <th class="num">Satış Tutar</th>
+                      <th class="num detail-col">Güncel Fiyat</th>
+                      <th class="num detail-col">Alış Tutar</th>
+                      <th class="num detail-col">Satış Tutar</th>
                       <th class="num">Gerç. K/Z</th>
                       <th class="num">Açık K/Z</th>
-                      <th class="num">Toplam K/Z</th>
+                      <th class="num detail-col">Toplam K/Z</th>
                       <th class="num">K/Z %</th>
-                      <th class="num">Kapalı Ort. Gün</th>
-                      <th class="num">Açık Ort. Gün</th>
-                      <th class="num">Ort. Maliyet</th>
+                      <th class="num detail-col">Kapalı Ort. Gün</th>
+                      <th class="num detail-col">Açık Ort. Gün</th>
+                      <th class="num detail-col">Ort. Maliyet</th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -625,11 +706,10 @@
                     <tr>
                       <th>Hisse</th>
                       <th class="num">Açık Lot</th>
-                      <th class="num">Güncel Fiyat</th>
-                      <th class="num">Ort. Maliyet</th>
+                      <th class="num detail-col">Güncel Fiyat</th>
+                      <th class="num detail-col">Ort. Maliyet</th>
                       <th class="num">Açık K/Z</th>
                       <th class="num">K/Z %</th>
-                      <th class="num">Günlük K/Z</th>
                       <th class="num">Toplam Maliyet</th>
                       <th class="num">Ort. Gün</th>
                     </tr>
@@ -655,9 +735,9 @@
                       <th>Tur</th>
                       <th class="num">Lot</th>
                       <th class="num">Fiyat</th>
-                      <th>0 Maliyet</th>
-                      <th class="num">Vergi</th>
-                      <th class="num">Net Tutar</th>
+                      <th class="detail-col">0 Maliyet</th>
+                      <th class="num detail-col">Vergi</th>
+                      <th class="num detail-col">Net Tutar</th>
                       <th class="num">İşlem</th>
                     </tr>
                   </thead>
@@ -669,9 +749,26 @@
 
           <section class="panel status-panel">
             <h2>Durum</h2>
+            <div class="status-toolbar">
+              <div>
+                <label for="appKeyInput">Dropbox App Key</label>
+                <input id="appKeyInput" type="text" placeholder="Dropbox app key" />
+              </div>
+              <label class="remember">
+                <input id="rememberDropbox" type="checkbox" checked />
+                Dropbox bağlantısını hatırla
+              </label>
+              <div class="actions">
+                <button type="button" id="btnConnectDropbox">Dropbox ile Bağlan</button>
+                <button type="button" id="btnDisconnectDropbox" class="ghost">Bağlantıyı Kaldır</button>
+              </div>
+            </div>
             <div class="status warn" id="statusBox">
 Hazir.
 Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
+            </div>
+            <div class="status-footer">
+              <div class="badge" id="connectionBadge">Dropbox bagli degil</div>
             </div>
           </section>
 
@@ -708,6 +805,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         livePreviousCloses: {},
         livePriceStatus: "idle",
         lastPriceKey: "",
+        compactTableMode: true,
         data: {
           schemaVersion: 1,
           updatedAt: null,
@@ -716,6 +814,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       };
 
       const els = {
+        mainLayout: document.getElementById("mainLayout"),
+        btnToggleSidebar: document.getElementById("btnToggleSidebar"),
+        btnToggleTableMode: document.getElementById("btnToggleTableMode"),
         appKeyInput: document.getElementById("appKeyInput"),
         rememberDropbox: document.getElementById("rememberDropbox"),
         btnConnectDropbox: document.getElementById("btnConnectDropbox"),
@@ -745,7 +846,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       function money(value) {
         if (value == null || Number.isNaN(value)) return "-";
-        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
+        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} TL`;
       }
 
       function numberFmt(value, digits = 0) {
@@ -758,7 +859,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       function daysFmt(value) {
         if (value == null || Number.isNaN(value)) return "-";
-        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} gün`;
+        return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} gün`;
       }
 
       function pctFmt(value) {
@@ -845,6 +946,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           updatedAt: safe.updatedAt || null,
           marketSnapshots: {
             currentDate: safe.marketSnapshots?.currentDate || null,
+            currentLoadedAt: safe.marketSnapshots?.currentLoadedAt || null,
             currentCloses: safe.marketSnapshots?.currentCloses && typeof safe.marketSnapshots.currentCloses === "object"
               ? safe.marketSnapshots.currentCloses
               : {},
@@ -901,6 +1003,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const today = todayLocalDateKey();
         const snapshots = state.data.marketSnapshots || {
           currentDate: null,
+          currentLoadedAt: null,
           currentCloses: {},
           previousDate: null,
           previousCloses: {},
@@ -912,8 +1015,10 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             snapshots.previousCloses = { ...(snapshots.currentCloses || {}) };
           }
           snapshots.currentDate = today;
+          snapshots.currentLoadedAt = new Date().toISOString();
           snapshots.currentCloses = { ...prices };
         } else {
+          snapshots.currentLoadedAt = new Date().toISOString();
           snapshots.currentCloses = { ...(snapshots.currentCloses || {}), ...prices };
         }
 
@@ -1242,6 +1347,75 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
+      // Yahoo is used only for previous close; current price continues to come from Fintables.
+      async function fetchYahooPreviousClose(symbol) {
+        try {
+          const yahooSymbol = `${symbol}.IS`;
+          const res = await fetch(
+            `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=5d&interval=1d`,
+            { cache: "no-store" }
+          );
+          const data = await res.json();
+          const result = data?.chart?.result?.[0];
+          const meta = result?.meta || {};
+          const quoteCloses = result?.indicators?.quote?.[0]?.close || [];
+
+          const metaPreviousClose = Number(meta.previousClose);
+          if (Number.isFinite(metaPreviousClose)) return metaPreviousClose;
+
+          const chartPreviousClose = Number(meta.chartPreviousClose);
+          if (Number.isFinite(chartPreviousClose)) return chartPreviousClose;
+
+          const validCloses = quoteCloses.filter((value) => Number.isFinite(value));
+          if (validCloses.length >= 2) {
+            return Number(validCloses[validCloses.length - 2]);
+          }
+
+          return null;
+        } catch (error) {
+          console.warn("yahoo previous close error", symbol, error);
+          return null;
+        }
+      }
+
+      async function fetchMynetPreviousCloses(symbols) {
+        const result = {};
+        try {
+          const res = await fetch("https://finans.mynet.com/borsa/hisseler/", { cache: "no-store" });
+          const html = await res.text();
+          const doc = new DOMParser().parseFromString(html, "text/html");
+          const text = doc.body?.innerText || "";
+
+          const parseTrNumber = (value) => {
+            if (!value) return null;
+            const normalized = String(value).replace(/\./g, "").replace(",", ".");
+            const num = Number(normalized);
+            return Number.isFinite(num) ? num : null;
+          };
+
+          symbols.forEach((symbol) => {
+            const pattern = new RegExp(
+              `\\b${symbol}\\b[^\\n\\r]*?([\\d.]+,\\d+)\\s+(-?[\\d.]+,\\d+)\\s+[\\d.]+,\\d+\\s+\\d{2}:\\d{2}`,
+              "i"
+            );
+            const match = text.match(pattern);
+            if (!match) return;
+
+            const currentPrice = parseTrNumber(match[1]);
+            const changePct = parseTrNumber(match[2]);
+            if (!Number.isFinite(currentPrice) || !Number.isFinite(changePct) || changePct <= -100) return;
+
+            const previousClose = currentPrice / (1 + changePct / 100);
+            if (Number.isFinite(previousClose) && previousClose > 0) {
+              result[symbol] = previousClose;
+            }
+          });
+        } catch (error) {
+          console.warn("mynet previous close error", error);
+        }
+        return result;
+      }
+
       async function loadLivePrices(symbols) {
         const uniqueSymbols = [...new Set((symbols || []).flatMap((value) => getMarketSymbolCandidates(value)))];
         if (!uniqueSymbols.length) {
@@ -1261,6 +1435,12 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           uniqueSymbols.every((symbol) => Number.isFinite(snapshotCurrentCloses[symbol]));
 
         if (hasTodaySnapshot) {
+          if (!state.data.marketSnapshots.currentLoadedAt) {
+            state.data.marketSnapshots.currentLoadedAt = currentSnapshotDate
+              ? `${currentSnapshotDate}T00:00:00`
+              : new Date().toISOString();
+            persistLocalData();
+          }
           state.livePrices = Object.fromEntries(
             uniqueSymbols.filter((symbol) => Number.isFinite(snapshotCurrentCloses[symbol])).map((symbol) => [symbol, snapshotCurrentCloses[symbol]])
           );
@@ -1298,6 +1478,21 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               next[symbol] = price;
             }
           });
+
+          const mynetPreviousCloses = await fetchMynetPreviousCloses(uniqueSymbols);
+
+          await Promise.all(
+            uniqueSymbols.map(async (symbol) => {
+              const previousClose = Number.isFinite(mynetPreviousCloses[symbol])
+                ? mynetPreviousCloses[symbol]
+                : await fetchYahooPreviousClose(symbol);
+              if (Number.isFinite(previousClose)) {
+                previousCloses[symbol] = previousClose;
+              } else if (Number.isFinite(snapshotPreviousCloses[symbol])) {
+                previousCloses[symbol] = snapshotPreviousCloses[symbol];
+              }
+            })
+          );
 
           state.livePrices = next;
           state.livePreviousCloses = previousCloses;
@@ -1344,6 +1539,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           unrealizedPnl: 0,
           unrealizedPnlPct: null,
           totalPnl: 0,
+          totalPnlPct: null,
           openCost: 0,
           openMarketValue: 0,
           costBearingOpenValueWeightedDaysTotal: 0,
@@ -1482,13 +1678,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           item.currentPrice =
             candidates.map((candidate) => livePrices[candidate]).find((value) => Number.isFinite(value)) ??
             (openQty ? fallbackValue / openQty : null);
-          item.previousClose =
-            candidates.map((candidate) => livePreviousCloses[candidate]).find((value) => Number.isFinite(value)) ?? null;
           item.openMarketValue = item.currentPrice != null ? openQty * item.currentPrice : null;
           item.unrealizedPnl = item.openMarketValue != null ? item.openMarketValue - openCost : zeroCostOpenValue || 0;
           item.openPnlPct = openCost ? (item.unrealizedPnl / openCost) * 100 : null;
-          item.dailyPnl =
-            item.currentPrice != null && item.previousClose != null ? (item.currentPrice - item.previousClose) * openQty : null;
           item.totalPnl = item.realizedPnl + (item.unrealizedPnl || 0);
           item.pnlPct = item.closedCostBasis ? (item.realizedPnl / item.closedCostBasis) * 100 : null;
           if (item.pnlPct == null && openQty > 0 && item.unrealizedPnl > 0 && openCost === 0) {
@@ -1505,11 +1697,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               avgCost: item.avgCost,
               openCost,
               currentPrice: item.currentPrice,
-              previousClose: item.previousClose,
               openMarketValue: item.openMarketValue,
               unrealizedPnl: item.unrealizedPnl,
               openPnlPct: item.openPnlPct,
-              dailyPnl: item.dailyPnl,
               openAvgDays: item.openAvgDays,
             });
             totals.openCost += openCost;
@@ -1546,6 +1736,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         totals.totalPnl = totals.realizedPnl + totals.unrealizedPnl;
         totals.realizedPnlPct = totals.realizedCostBasis ? (totals.realizedPnl / totals.realizedCostBasis) * 100 : null;
         totals.unrealizedPnlPct = totals.openCost ? (totals.unrealizedPnl / totals.openCost) * 100 : null;
+        totals.totalPnlPct = totals.realizedCostBasis + totals.openCost
+          ? (totals.totalPnl / (totals.realizedCostBasis + totals.openCost)) * 100
+          : null;
         totals.portfolioOpenAvgDays = totals.costBearingOpenMarketValue
           ? totals.costBearingOpenValueWeightedDaysTotal / totals.costBearingOpenMarketValue
           : null;
@@ -1582,6 +1775,11 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             value: pctFmt(analysis.totals.unrealizedPnlPct),
             className: (analysis.totals.unrealizedPnlPct ?? 0) >= 0 ? "good" : "bad",
           },
+          {
+            label: "Toplam %K/Z",
+            value: pctFmt(analysis.totals.totalPnlPct),
+            className: (analysis.totals.totalPnlPct ?? 0) >= 0 ? "good" : "bad",
+          },
         ];
 
         els.kpiGrid.innerHTML = kpis
@@ -1610,16 +1808,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num">${numberFmt(row.buyQty, 0)}</td>
                 <td class="num">${numberFmt(row.sellQty, 0)}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
-                <td class="num">${money(row.currentPrice)}</td>
-                <td class="num">${money(row.buyAmount)}</td>
-                <td class="num">${money(row.sellAmount)}</td>
+                <td class="num detail-col">${money(row.currentPrice)}</td>
+                <td class="num detail-col">${money(row.buyAmount)}</td>
+                <td class="num detail-col">${money(row.sellAmount)}</td>
                 <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
-                <td class="num ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
+                <td class="num detail-col ${(row.totalPnl ?? row.realizedPnl) >= 0 ? "good" : "bad"}">${money(row.totalPnl ?? row.realizedPnl)}</td>
                 <td class="num">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
-                <td class="num">${daysFmt(row.closedAvgDays)}</td>
-                <td class="num">${daysFmt(row.openAvgDays)}</td>
-                <td class="num">${money(row.avgCost)}</td>
+                <td class="num detail-col">${daysFmt(row.closedAvgDays)}</td>
+                <td class="num detail-col">${daysFmt(row.openAvgDays)}</td>
+                <td class="num detail-col">${money(row.avgCost)}</td>
               </tr>
             `
           )
@@ -1628,7 +1826,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       function renderOpenTable(rows) {
         if (!rows.length) {
-          els.openTableBody.innerHTML = `<tr><td colspan="9"><div class="empty">Açık pozisyon yok.</div></td></tr>`;
+          els.openTableBody.innerHTML = `<tr><td colspan="8"><div class="empty">Açık pozisyon yok.</div></td></tr>`;
           return;
         }
         els.openTableBody.innerHTML = rows
@@ -1637,11 +1835,10 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               <tr>
                 <td>${row.symbol}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
-                <td class="num">${money(row.currentPrice)}</td>
-                <td class="num">${money(row.avgCost)}</td>
+                <td class="num detail-col">${money(row.currentPrice)}</td>
+                <td class="num detail-col">${money(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num">${pctFmt(row.openPnlPct)}</td>
-                <td class="num ${row.dailyPnl == null ? "" : row.dailyPnl >= 0 ? "good" : "bad"}">${money(row.dailyPnl)}</td>
                 <td class="num">${money(row.openCost)}</td>
                 <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
               </tr>
@@ -1666,9 +1863,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td>${tx.type}</td>
                 <td class="num">${numberFmt(tx.quantity, 0)}</td>
                 <td class="num">${(tx.referencePrice ?? tx.price) != null ? numberFmt(tx.referencePrice ?? tx.price, 4) : "-"}</td>
-                <td>${tx.zeroCost ? "Evet" : "-"}</td>
-                <td class="num">${money(tx.tax || 0)}</td>
-                <td class="num">${money(tx._computedAmount)}</td>
+                <td class="detail-col">${tx.zeroCost ? "Evet" : "-"}</td>
+                <td class="num detail-col">${money(tx.tax || 0)}</td>
+                <td class="num detail-col">${money(tx._computedAmount)}</td>
                 <td class="num">
                   <div class="inline-actions">
                     <button class="ghost" onclick="editTransaction('${tx.id}')">Duzenle</button>
@@ -1691,15 +1888,28 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         renderHistoryTable(state.data.transactions);
 
         const updatedText = state.data.updatedAt
-          ? `Son kayit: ${new Date(state.data.updatedAt).toLocaleString("tr-TR")}`
+          ? `Son kayıt: ${new Date(state.data.updatedAt).toLocaleString("tr-TR")}`
           : "Henüz Dropbox'a yazilmadi.";
-        const priceText = state.livePriceStatus === "ready"
-          ? " | Güncel fiyatlar yüklendi"
-          : state.livePriceStatus === "loading"
-            ? " | Güncel fiyatlar yükleniyor"
-            : state.livePriceStatus === "error"
-              ? " | Güncel fiyat alınamadı"
-              : "";
+        const currentSnapshotDate = state.data.marketSnapshots?.currentDate;
+        const fallbackLoadedAt =
+          Object.keys(state.livePrices || {}).length && state.data.updatedAt ? state.data.updatedAt : null;
+        const currentSnapshotLoadedAt =
+          state.data.marketSnapshots?.currentLoadedAt ||
+          fallbackLoadedAt ||
+          (currentSnapshotDate ? `${currentSnapshotDate}T00:00:00` : null);
+        const currentSnapshotStamp = currentSnapshotLoadedAt
+          ? new Date(currentSnapshotLoadedAt).toLocaleString("tr-TR")
+          : null;
+        let priceText = currentSnapshotStamp
+          ? ` | Güncel fiyatlar yüklendi (${currentSnapshotStamp})`
+          : "";
+        if (state.livePriceStatus === "loading") {
+          priceText = priceText ? `${priceText} | Güncelleniyor` : " | Güncel fiyatlar yükleniyor";
+        } else if (state.livePriceStatus === "error") {
+          priceText = priceText ? `${priceText} | Güncel fiyat alınamadı` : " | Güncel fiyat alınamadı";
+        } else if (state.livePriceStatus === "ready" && !priceText) {
+          priceText = " | Güncel fiyatlar yüklendi";
+        }
         els.summaryMeta.textContent = `${updatedText} | Açık pozisyon sayısı: ${analysis.openRows.length}${priceText}`;
         els.recordCountChip.textContent = `${state.data.transactions.length} kayit`;
       }
@@ -1809,8 +2019,33 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       };
 
+      function updateSidebarToggle() {
+        const isCompact = els.mainLayout.classList.contains("compact");
+        els.btnToggleSidebar.textContent = isCompact ? "+ Yeni İşlem Ekle" : "Gizle";
+        els.btnToggleSidebar.classList.toggle("ghost", !isCompact);
+      }
+
+      function toggleSidebar() {
+        els.mainLayout.classList.toggle("compact");
+        updateSidebarToggle();
+      }
+
+      function updateTableMode() {
+        const wrap = document.querySelector(".wrap");
+        wrap.classList.toggle("compact-tables", state.compactTableMode);
+        wrap.classList.toggle("detailed-tables", !state.compactTableMode);
+        els.btnToggleTableMode.textContent = state.compactTableMode ? "Detaylı Görünüm" : "Genel Görünüm";
+      }
+
+      function toggleTableMode() {
+        state.compactTableMode = !state.compactTableMode;
+        updateTableMode();
+      }
+
       function bindEvents() {
         document.getElementById("btnResetForm").addEventListener("click", resetForm);
+        els.btnToggleSidebar.addEventListener("click", toggleSidebar);
+        els.btnToggleTableMode.addEventListener("click", toggleTableMode);
         els.btnConnectDropbox.addEventListener("click", connectDropbox);
         els.btnDisconnectDropbox.addEventListener("click", disconnectDropbox);
         els.txForm.addEventListener("submit", saveTransaction);
@@ -1823,6 +2058,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       async function init() {
         loadLocalState();
+        updateSidebarToggle();
+        updateTableMode();
         bindEvents();
         updateConnectionBadge();
         await refreshPricesAndRender();
