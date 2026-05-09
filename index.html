@@ -17,14 +17,8 @@
         --line: #46505b;
         --accent: #3b82f6;
         --accent-2: #dbe9ff;
-        --space-xs: 4px;
-        --space-sm: 8px;
-        --space-md: 16px;
-        --space-lg: 24px;
-        --profit-color: #46d17d;
-        --loss-color: #ef6b73;
-        --good: var(--profit-color);
-        --bad: var(--loss-color);
+        --good: #4ade80;
+        --bad: #f87171;
         --warn: #fbbf24;
       }
 
@@ -81,14 +75,14 @@
         background: linear-gradient(135deg, rgba(44, 50, 57, 0.96), rgba(34, 39, 45, 0.94));
         border: 1px solid var(--line);
         border-radius: 16px;
-        padding: var(--space-md);
+        padding: 16px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
       }
 
       .hero-top {
         display: flex;
         flex-direction: column;
-        gap: var(--space-sm);
+        gap: 10px;
         align-items: stretch;
       }
 
@@ -108,8 +102,8 @@
       .badge {
         display: inline-flex;
         align-items: center;
-        gap: var(--space-sm);
-        padding: calc(var(--space-sm) + 1px) calc(var(--space-sm) + 5px);
+        gap: 8px;
+        padding: 9px 13px;
         border-radius: 999px;
         border: 1px solid var(--line);
         background: rgba(56, 64, 73, 0.95);
@@ -123,7 +117,7 @@
       .actions,
       .stack {
         display: flex;
-        gap: var(--space-sm);
+        gap: 10px;
         flex-wrap: wrap;
       }
 
@@ -134,8 +128,8 @@
       .layout {
         display: grid;
         grid-template-columns: 1fr;
-        gap: var(--space-sm);
-        margin-top: var(--space-sm);
+        gap: 12px;
+        margin-top: 12px;
       }
 
       .layout.compact {
@@ -144,7 +138,7 @@
 
       .right-column {
         display: grid;
-        gap: var(--space-sm);
+        gap: 12px;
       }
 
       .side-panel {
@@ -155,8 +149,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: var(--space-sm);
-        margin-bottom: calc(var(--space-sm) + 6px);
+        gap: 10px;
+        margin-bottom: 14px;
       }
 
       .side-header h2 {
@@ -165,7 +159,7 @@
       }
 
       .side-toggle {
-        padding: calc(var(--space-sm) + 2px) calc(var(--space-md));
+        padding: 10px 14px;
         font-size: 13px;
         min-width: 0;
       }
@@ -204,36 +198,36 @@
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: calc(var(--space-sm) + 6px);
+        padding: 14px;
         box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
       }
 
       .panel h2 {
-        margin: 0 0 calc(var(--space-sm) + 2px);
+        margin: 0 0 10px;
         font-size: 17px;
       }
 
       .panel p {
-        margin: 0 0 calc(var(--space-sm) + 4px);
+        margin: 0 0 12px;
         color: var(--muted);
         line-height: 1.5;
       }
 
       .form-grid {
         display: grid;
-        gap: calc(var(--space-sm) + 4px);
+        gap: 12px;
       }
 
       .two-col {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: calc(var(--space-sm) + 4px);
+        gap: 12px;
       }
 
       .three-col {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: calc(var(--space-sm) + 4px);
+        gap: 12px;
       }
 
       label {
@@ -249,7 +243,7 @@
         width: 100%;
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 12px calc(var(--space-sm) + 5px);
+        padding: 12px 13px;
         background: rgba(31, 35, 40, 0.96);
         color: var(--ink);
         font: inherit;
@@ -270,7 +264,7 @@
       button {
         border: 0;
         border-radius: 10px;
-        padding: 12px var(--space-md);
+        padding: 12px 16px;
         font: inherit;
         font-weight: 700;
         cursor: pointer;
@@ -299,7 +293,7 @@
 
       .remember {
         display: flex;
-        gap: var(--space-sm);
+        gap: 10px;
         align-items: center;
         color: var(--muted);
         font-size: 13px;
@@ -312,11 +306,10 @@
       .status {
         border-radius: 16px;
         border: 1px solid var(--line);
-        padding: calc(var(--space-sm) + 6px) var(--space-md);
+        padding: 14px 16px;
         background: rgba(28, 32, 37, 0.95);
         white-space: pre-wrap;
         font: 13px/1.5 Consolas, monospace;
-        font-variant-numeric: tabular-nums;
       }
 
       .status.ok {
@@ -334,13 +327,13 @@
       .kpi-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: var(--space-sm);
+        gap: 10px;
       }
 
       .kpi {
         border: 1px solid var(--line);
         border-radius: 12px;
-        padding: calc(var(--space-sm) + 6px);
+        padding: 14px;
         background: var(--card-2);
       }
 
@@ -348,7 +341,7 @@
         display: block;
         font-size: 12px;
         color: var(--muted);
-        margin-bottom: var(--space-sm);
+        margin-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
@@ -356,11 +349,10 @@
       .kpi-value {
         font-size: 20px;
         font-weight: 800;
-        font-variant-numeric: tabular-nums;
       }
 
       .kpi-note {
-        margin-top: var(--space-sm);
+        margin-top: 8px;
         font-size: 12px;
         color: var(--muted);
       }
@@ -375,7 +367,7 @@
 
       .tables {
         display: grid;
-        gap: var(--space-sm);
+        gap: 12px;
       }
 
       .tables > div:nth-child(1) {
@@ -404,7 +396,7 @@
 
       th,
       td {
-        padding: calc(var(--space-sm) + 2px) calc(var(--space-sm) + 2px);
+        padding: 10px 10px;
         border-bottom: 1px solid var(--line);
         text-align: left;
         font-size: 13px;
@@ -421,7 +413,6 @@
       td.num,
       th.num {
         text-align: right;
-        font-variant-numeric: tabular-nums;
       }
 
       tbody tr:nth-child(even) td {
@@ -435,9 +426,9 @@
       .toolbar {
         display: flex;
         justify-content: space-between;
-        gap: var(--space-sm);
+        gap: 8px;
         align-items: center;
-        margin-bottom: calc(var(--space-sm) + 2px);
+        margin-bottom: 10px;
       }
 
       .toolbar small {
@@ -453,7 +444,6 @@
         color: var(--accent-2);
         font-size: 12px;
         font-weight: 700;
-        font-variant-numeric: tabular-nums;
       }
 
       .table-mode-toggle {
@@ -471,16 +461,16 @@
 
       .inline-actions {
         display: flex;
-        gap: var(--space-sm);
+        gap: 8px;
         justify-content: flex-end;
       }
 
       .status-panel {
-        margin-top: var(--space-sm);
+        margin-top: 12px;
       }
 
       .status-footer {
-        margin-top: var(--space-sm);
+        margin-top: 12px;
         display: flex;
         justify-content: flex-start;
       }
@@ -488,9 +478,9 @@
       .status-toolbar {
         display: grid;
         grid-template-columns: minmax(180px, 260px) auto auto;
-        gap: calc(var(--space-sm) + 4px);
+        gap: 12px;
         align-items: center;
-        margin-bottom: calc(var(--space-sm) + 6px);
+        margin-bottom: 14px;
       }
 
       .status-toolbar .remember {
@@ -498,7 +488,7 @@
       }
 
       .inline-actions button {
-        padding: var(--space-sm) 12px;
+        padding: 8px 12px;
         font-size: 12px;
       }
 
@@ -519,7 +509,7 @@
         }
 
         .hero {
-          padding: calc(var(--space-sm) + 6px);
+          padding: 14px;
           border-radius: 14px;
         }
 
@@ -820,6 +810,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         livePrices: {},
         livePreviousCloses: {},
         livePriceStatus: "idle",
+        livePriceCheckedAt: null,
         lastPriceKey: "",
         compactTableMode: true,
         data: {
@@ -1916,17 +1907,22 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const currentSnapshotStamp = currentSnapshotLoadedAt
           ? new Date(currentSnapshotLoadedAt).toLocaleString("tr-TR")
           : null;
-        let priceText = currentSnapshotStamp
-          ? ` | Güncel fiyatlar yüklendi (${currentSnapshotStamp})`
-          : "";
+        const liveCheckStamp = state.livePriceCheckedAt
+          ? new Date(state.livePriceCheckedAt).toLocaleString("tr-TR")
+          : currentSnapshotStamp;
+        let priceText = liveCheckStamp
+          ? `Güncel fiyatlar yüklendi (${liveCheckStamp})`
+          : "Güncel fiyatlar henüz yüklenmedi";
         if (state.livePriceStatus === "loading") {
-          priceText = priceText ? `${priceText} | Güncelleniyor` : " | Güncel fiyatlar yükleniyor";
+          priceText = `${priceText} | Güncelleniyor`;
         } else if (state.livePriceStatus === "error") {
-          priceText = priceText ? `${priceText} | Güncel fiyat alınamadı` : " | Güncel fiyat alınamadı";
-        } else if (state.livePriceStatus === "ready" && !priceText) {
-          priceText = " | Güncel fiyatlar yüklendi";
+          priceText = `${priceText} | Güncel fiyat alınamadı`;
         }
-        els.summaryMeta.textContent = `${updatedText} | Açık pozisyon sayısı: ${analysis.openRows.length}${priceText}`;
+        els.summaryMeta.innerHTML = [
+          updatedText,
+          `Açık pozisyon sayısı: ${analysis.openRows.length}`,
+          priceText,
+        ].join("<br>");
         els.recordCountChip.textContent = `${state.data.transactions.length} kayit`;
       }
 
@@ -1934,6 +1930,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const symbols = [...new Set(state.data.transactions.map((tx) => (tx.symbol || "").toUpperCase()).filter(Boolean))];
         renderAll();
         await loadLivePrices(symbols);
+        state.livePriceCheckedAt = new Date().toISOString();
         renderAll();
       }
 
