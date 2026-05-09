@@ -61,6 +61,18 @@
 
       .wrap.compact-tables table {
         min-width: 100%;
+        table-layout: fixed;
+      }
+
+      .wrap.compact-tables th,
+      .wrap.compact-tables td {
+        padding: 9px 6px;
+        font-size: 12px;
+      }
+
+      .wrap.compact-tables th:not(:first-child),
+      .wrap.compact-tables td:not(:first-child) {
+        white-space: nowrap;
       }
 
       .hero,
