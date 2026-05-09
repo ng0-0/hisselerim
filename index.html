@@ -374,6 +374,12 @@
         display: grid;
         gap: 12px;
         min-width: 0;
+        overflow: hidden;
+      }
+
+      .tables > div {
+        min-width: 0;
+        max-width: 100%;
       }
 
       .tables > div:nth-child(1) {
@@ -389,6 +395,8 @@
       }
 
       .table-wrap {
+        display: block;
+        width: 100%;
         overflow: auto;
         border: 1px solid var(--line);
         border-radius: 12px;
