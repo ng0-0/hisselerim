@@ -66,13 +66,23 @@
 
       .wrap.compact-tables th,
       .wrap.compact-tables td {
-        padding: 8px 5px;
-        font-size: 11px;
+        padding: 9px 6px;
+        font-size: 12px;
       }
 
-      .wrap.compact-tables th:not(:first-child),
       .wrap.compact-tables td:not(:first-child) {
         white-space: nowrap;
+      }
+
+      .wrap.compact-tables th {
+        white-space: normal;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .wrap.compact-tables td:first-child,
+      .wrap.compact-tables td:not(:first-child) {
+        word-break: normal;
       }
 
       .wrap.compact-tables #openTable {
