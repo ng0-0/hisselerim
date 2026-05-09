@@ -2,12 +2,14 @@
 <html lang="tr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Hisse Portföy Takip</title>
     <style>
       :root {
-        --bg-1: #2f343b;
-        --bg-2: #1f2328;
+        --bg-1: #0f172a;
+        --bg-2: #111827;
         --card: rgba(39, 44, 51, 0.94);
         --card-2: rgba(48, 55, 63, 0.9);
         --ink: #f3f7fb;
@@ -30,20 +32,29 @@
         box-sizing: border-box;
       }
 
+      html {
+        min-height: 100%;
+        background: #0f172a;
+      }
+
       body {
         margin: 0;
+        min-height: 100vh;
         font-family: "Segoe UI", Tahoma, sans-serif;
         color: var(--ink);
+        background-color: #0f172a;
         background:
           radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 24%),
           radial-gradient(circle at top right, rgba(74, 222, 128, 0.08), transparent 22%),
           linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        padding-top: calc(env(safe-area-inset-top, 0px) + 15px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 15px);
       }
 
       .wrap {
-        max-width: 540px;
-        margin: var(--space-sm) auto var(--space-lg);
-        padding: 0 calc(var(--space-sm) + 2px);
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 0 15px;
       }
 
       .wrap.compact-tables .detail-col {
@@ -505,11 +516,6 @@
         .two-col,
         .three-col {
           grid-template-columns: 1fr;
-        }
-
-        .wrap {
-          margin: 10px auto 22px;
-          padding: 0 10px;
         }
 
         .hero {
