@@ -759,6 +759,7 @@
                       <th class="num detail-col">Ort. Maliyet</th>
                       <th class="num">Açık K/Z</th>
                       <th class="num">K/Z %</th>
+                      <th class="num detail-col">Günlük K/Z</th>
                       <th class="num">Toplam Maliyet</th>
                       <th class="num">Ort. Gün</th>
                     </tr>
@@ -816,6 +817,7 @@
 Hazir.
 Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             </div>
+            <div class="status" id="debugBox" style="margin-top:12px;">Önceki kapanış kontrolü bekleniyor.</div>
             <div class="status-footer">
               <div class="badge" id="connectionBadge">Dropbox bagli degil</div>
             </div>
@@ -852,6 +854,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         autoLoadTried: false,
         livePrices: {},
         livePreviousCloses: {},
+        liveDailyChangePcts: {},
+        livePreviousCloseDebug: {},
         livePriceStatus: "idle",
         livePriceCheckedAt: null,
         lastPriceKey: "",
@@ -872,6 +876,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         btnConnectDropbox: document.getElementById("btnConnectDropbox"),
         btnDisconnectDropbox: document.getElementById("btnDisconnectDropbox"),
         statusBox: document.getElementById("statusBox"),
+        debugBox: document.getElementById("debugBox"),
         connectionBadge: document.getElementById("connectionBadge"),
         summaryMeta: document.getElementById("summaryMeta"),
         recordCountChip: document.getElementById("recordCountChip"),
@@ -892,6 +897,20 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       function setStatus(text, kind = "warn") {
         els.statusBox.textContent = text;
         els.statusBox.className = `status ${kind}`;
+      }
+
+      function renderPreviousCloseDebug() {
+        const debugEntries = Object.entries(state.livePreviousCloseDebug || {});
+        if (!debugEntries.length) {
+          els.debugBox.textContent = "Önceki kapanış kontrolü bekleniyor.";
+          els.debugBox.className = "status";
+          return;
+        }
+        els.debugBox.textContent = `Önceki kapanış kontrolü:\n${debugEntries
+          .slice(0, 8)
+          .map(([symbol, value]) => `${symbol}: ${value}`)
+          .join("\n")}`;
+        els.debugBox.className = "status warn";
       }
 
       function money(value) {
@@ -1428,10 +1447,11 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
-      async function fetchMynetPreviousCloses(symbols) {
+      async function fetchCnnTurkDailyChanges(symbols) {
         const result = {};
+        const debug = {};
         try {
-          const res = await fetch("https://finans.mynet.com/borsa/hisseler/", { cache: "no-store" });
+          const res = await fetch("https://finans.cnnturk.com/borsa/gecmis-kapanislar", { cache: "no-store" });
           const html = await res.text();
           const doc = new DOMParser().parseFromString(html, "text/html");
           const text = doc.body?.innerText || "";
@@ -1445,23 +1465,27 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
           symbols.forEach((symbol) => {
             const pattern = new RegExp(
-              `\\b${symbol}\\b[^\\n\\r]*?([\\d.]+,\\d+)\\s+(-?[\\d.]+,\\d+)\\s+[\\d.]+,\\d+\\s+\\d{2}:\\d{2}`,
+              `\\b${symbol}\\b\\s+([\\d.]+,\\d+)\\s+([\\d.]+,\\d+)\\s+(-?[\\d.]+,\\d+)\\s*%\\s+([\\d.]+,\\d+)\\s+([\\d.]+,\\d+)`,
               "i"
             );
             const match = text.match(pattern);
-            if (!match) return;
+            if (!match) {
+              debug[symbol] = "no-match";
+              return;
+            }
 
-            const currentPrice = parseTrNumber(match[1]);
-            const changePct = parseTrNumber(match[2]);
-            if (!Number.isFinite(currentPrice) || !Number.isFinite(changePct) || changePct <= -100) return;
-
-            const previousClose = currentPrice / (1 + changePct / 100);
-            if (Number.isFinite(previousClose) && previousClose > 0) {
-              result[symbol] = previousClose;
+            const changePct = parseTrNumber(match[3]);
+            if (Number.isFinite(changePct) && changePct > -100) {
+              result[symbol] = changePct;
+              debug[symbol] = `ok:${match[1]}|${match[2]}|%${match[3]}`;
+            } else {
+              debug[symbol] = "invalid-number";
             }
           });
+          state.livePreviousCloseDebug = debug;
         } catch (error) {
-          console.warn("mynet previous close error", error);
+          console.warn("cnnturk previous close error", error);
+          state.livePreviousCloseDebug = Object.fromEntries(symbols.map((symbol) => [symbol, `error:${String(error)}`]));
         }
         return result;
       }
@@ -1471,6 +1495,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         if (!uniqueSymbols.length) {
           state.livePrices = {};
           state.livePreviousCloses = {};
+          state.liveDailyChangePcts = {};
           state.livePriceStatus = "idle";
           state.lastPriceKey = "";
           return;
@@ -1494,9 +1519,35 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           state.livePrices = Object.fromEntries(
             uniqueSymbols.filter((symbol) => Number.isFinite(snapshotCurrentCloses[symbol])).map((symbol) => [symbol, snapshotCurrentCloses[symbol]])
           );
-          state.livePreviousCloses = Object.fromEntries(
+          const cachedPreviousCloses = Object.fromEntries(
             uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
           );
+          state.liveDailyChangePcts = {};
+          state.livePreviousCloseDebug = Object.fromEntries(uniqueSymbols.map((symbol) => [symbol, "snapshot-only"]));
+          if (Object.keys(cachedPreviousCloses).length !== uniqueSymbols.length) {
+            const cnnTurkDailyChanges = await fetchCnnTurkDailyChanges(uniqueSymbols);
+            state.liveDailyChangePcts = cnnTurkDailyChanges;
+            await Promise.all(
+              uniqueSymbols.map(async (symbol) => {
+                const currentPrice = state.livePrices[symbol];
+                const changePct = cnnTurkDailyChanges[symbol];
+                if (Number.isFinite(currentPrice) && Number.isFinite(changePct) && changePct > -100) {
+                  const derivedPreviousClose = currentPrice / (1 + changePct / 100);
+                  if (Number.isFinite(derivedPreviousClose) && derivedPreviousClose > 0) {
+                    cachedPreviousCloses[symbol] = derivedPreviousClose;
+                    return;
+                  }
+                } else if (!Number.isFinite(cachedPreviousCloses[symbol])) {
+                  const yahooPreviousClose = await fetchYahooPreviousClose(symbol);
+                  if (Number.isFinite(yahooPreviousClose)) {
+                    cachedPreviousCloses[symbol] = yahooPreviousClose;
+                    state.livePreviousCloseDebug[symbol] = "yahoo-fallback";
+                  }
+                }
+              })
+            );
+          }
+          state.livePreviousCloses = cachedPreviousCloses;
           state.livePriceStatus = "ready";
           state.lastPriceKey = key;
           return;
@@ -1529,13 +1580,19 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             }
           });
 
-          const mynetPreviousCloses = await fetchMynetPreviousCloses(uniqueSymbols);
+          const cnnTurkDailyChanges = await fetchCnnTurkDailyChanges(uniqueSymbols);
+          state.liveDailyChangePcts = cnnTurkDailyChanges;
 
           await Promise.all(
             uniqueSymbols.map(async (symbol) => {
-              const previousClose = Number.isFinite(mynetPreviousCloses[symbol])
-                ? mynetPreviousCloses[symbol]
-                : await fetchYahooPreviousClose(symbol);
+              let previousClose = null;
+              const currentPrice = next[symbol];
+              const changePct = cnnTurkDailyChanges[symbol];
+              if (Number.isFinite(currentPrice) && Number.isFinite(changePct) && changePct > -100) {
+                previousClose = currentPrice / (1 + changePct / 100);
+              } else {
+                previousClose = await fetchYahooPreviousClose(symbol);
+              }
               if (Number.isFinite(previousClose)) {
                 previousCloses[symbol] = previousClose;
               } else if (Number.isFinite(snapshotPreviousCloses[symbol])) {
@@ -1573,7 +1630,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         return gross;
       }
 
-      function analyzePortfolio(transactions, livePrices = {}, livePreviousCloses = {}) {
+      function analyzePortfolio(transactions, livePrices = {}, livePreviousCloses = {}, liveDailyChangePcts = {}) {
         const sorted = [...transactions].sort((a, b) => new Date(a.tradeDate) - new Date(b.tradeDate));
         const positions = new Map();
         const perSymbol = new Map();
@@ -1733,12 +1790,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             (openQty ? fallbackValue / openQty : null);
           item.previousClose =
             candidates.map((candidate) => livePreviousCloses[candidate]).find((value) => Number.isFinite(value)) ?? null;
+          item.dailyChangePct =
+            candidates.map((candidate) => liveDailyChangePcts[candidate]).find((value) => Number.isFinite(value)) ?? null;
           item.openMarketValue = item.currentPrice != null ? openQty * item.currentPrice : null;
           item.unrealizedPnl = item.openMarketValue != null ? item.openMarketValue - openCost : zeroCostOpenValue || 0;
           item.dailyPnl =
-            Number.isFinite(item.currentPrice) && Number.isFinite(item.previousClose)
-              ? (item.currentPrice - item.previousClose) * openQty
-              : null;
+            item.openMarketValue != null && Number.isFinite(item.dailyChangePct) && item.dailyChangePct > -100
+              ? item.openMarketValue - item.openMarketValue / (1 + item.dailyChangePct / 100)
+              : Number.isFinite(item.currentPrice) && Number.isFinite(item.previousClose)
+                ? (item.currentPrice - item.previousClose) * openQty
+                : null;
           item.openPnlPct = openCost ? (item.unrealizedPnl / openCost) * 100 : null;
           item.totalPnl = item.realizedPnl + (item.unrealizedPnl || 0);
           item.pnlPct = item.closedCostBasis ? (item.realizedPnl / item.closedCostBasis) * 100 : null;
@@ -1892,7 +1953,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       function renderOpenTable(rows) {
         if (!rows.length) {
-          els.openTableBody.innerHTML = `<tr><td colspan="8"><div class="empty">Açık pozisyon yok.</div></td></tr>`;
+          els.openTableBody.innerHTML = `<tr><td colspan="9"><div class="empty">Açık pozisyon yok.</div></td></tr>`;
           return;
         }
         els.openTableBody.innerHTML = rows
@@ -1905,6 +1966,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num detail-col">${money(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num">${pctFmt(row.openPnlPct)}</td>
+                <td class="num detail-col">${money(row.dailyPnl)}</td>
                 <td class="num">${money(row.openCost)}</td>
                 <td class="num">${row.openCost > 0 ? daysFmt(row.openAvgDays) : "-"}</td>
               </tr>
@@ -1947,11 +2009,12 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       function renderAll() {
         const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
         const effectivePreviousCloses = { ...snapshotPreviousCloses, ...state.livePreviousCloses };
-        const analysis = analyzePortfolio(state.data.transactions, state.livePrices, effectivePreviousCloses);
+        const analysis = analyzePortfolio(state.data.transactions, state.livePrices, effectivePreviousCloses, state.liveDailyChangePcts);
         renderKpis(analysis);
         renderSummaryTable(analysis.symbolRows);
         renderOpenTable(analysis.openRows);
         renderHistoryTable(state.data.transactions);
+        renderPreviousCloseDebug();
 
         const updatedText = state.data.updatedAt
           ? `Son kayıt: ${new Date(state.data.updatedAt).toLocaleString("tr-TR")}`
