@@ -338,7 +338,7 @@
       .kpi {
         border: 1px solid var(--line);
         border-radius: 12px;
-        padding: 14px;
+        padding: 11px 14px;
         background: var(--card-2);
       }
 
@@ -346,7 +346,7 @@
         display: block;
         font-size: 12px;
         color: var(--muted);
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
@@ -354,10 +354,23 @@
       .kpi-value {
         font-size: 20px;
         font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .kpi-value-inline {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .kpi-value-inline .kpi-inline-note {
+        font: inherit;
+        color: inherit;
       }
 
       .kpi-note {
-        margin-top: 8px;
+        margin-top: 6px;
         font-size: 12px;
         color: var(--muted);
       }
@@ -575,7 +588,7 @@
         }
 
         .kpi {
-          padding: 13px;
+          padding: 10px 13px;
           border-radius: 16px;
         }
 
@@ -1570,6 +1583,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           sellAmount: 0,
           dividendAmount: 0,
           feeAmount: 0,
+          dailyPnl: 0,
+          dailyPnlPct: null,
           realizedPnl: 0,
           realizedCostBasis: 0,
           realizedPnlPct: null,
@@ -1577,6 +1592,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           unrealizedPnlPct: null,
           totalPnl: 0,
           totalPnlPct: null,
+          previousOpenMarketValue: 0,
           openCost: 0,
           openMarketValue: 0,
           costBearingOpenValueWeightedDaysTotal: 0,
@@ -1715,8 +1731,14 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           item.currentPrice =
             candidates.map((candidate) => livePrices[candidate]).find((value) => Number.isFinite(value)) ??
             (openQty ? fallbackValue / openQty : null);
+          item.previousClose =
+            candidates.map((candidate) => livePreviousCloses[candidate]).find((value) => Number.isFinite(value)) ?? null;
           item.openMarketValue = item.currentPrice != null ? openQty * item.currentPrice : null;
           item.unrealizedPnl = item.openMarketValue != null ? item.openMarketValue - openCost : zeroCostOpenValue || 0;
+          item.dailyPnl =
+            Number.isFinite(item.currentPrice) && Number.isFinite(item.previousClose)
+              ? (item.currentPrice - item.previousClose) * openQty
+              : null;
           item.openPnlPct = openCost ? (item.unrealizedPnl / openCost) * 100 : null;
           item.totalPnl = item.realizedPnl + (item.unrealizedPnl || 0);
           item.pnlPct = item.closedCostBasis ? (item.realizedPnl / item.closedCostBasis) * 100 : null;
@@ -1734,8 +1756,10 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               avgCost: item.avgCost,
               openCost,
               currentPrice: item.currentPrice,
+              previousClose: item.previousClose,
               openMarketValue: item.openMarketValue,
               unrealizedPnl: item.unrealizedPnl,
+              dailyPnl: item.dailyPnl,
               openPnlPct: item.openPnlPct,
               openAvgDays: item.openAvgDays,
             });
@@ -1745,6 +1769,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               totals.costBearingOpenValueWeightedDaysTotal += (item.openMarketValue ?? 0) * (item.openAvgDays ?? 0);
               totals.costBearingOpenMarketValue += item.openMarketValue ?? 0;
             }
+            totals.dailyPnl += item.dailyPnl || 0;
+            totals.previousOpenMarketValue += (item.openMarketValue ?? 0) - (item.dailyPnl || 0);
             totals.unrealizedPnl += item.unrealizedPnl || 0;
           }
         }
@@ -1771,6 +1797,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           .sort((a, b) => (b.totalPnl ?? b.realizedPnl) - (a.totalPnl ?? a.realizedPnl));
 
         totals.totalPnl = totals.realizedPnl + totals.unrealizedPnl;
+        totals.dailyPnlPct = totals.previousOpenMarketValue ? (totals.dailyPnl / totals.previousOpenMarketValue) * 100 : null;
         totals.realizedPnlPct = totals.realizedCostBasis ? (totals.realizedPnl / totals.realizedCostBasis) * 100 : null;
         totals.unrealizedPnlPct = totals.openCost ? (totals.unrealizedPnl / totals.openCost) * 100 : null;
         totals.totalPnlPct = totals.realizedCostBasis + totals.openCost
@@ -1788,34 +1815,36 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       }
 
       function renderKpis(analysis) {
+        const pnlDisplay = (amount, pct) => ({
+          value: `<span class="kpi-value-inline"><span>${pctFmt(pct)}</span><span class="kpi-inline-note">(${money(amount)})</span></span>`,
+          className: (amount ?? 0) >= 0 ? "good" : "bad",
+          htmlValue: true,
+        });
+
         const kpis = [
           {
             label: "Portföy Büyüklüğü",
             value: money(analysis.totals.openMarketValue),
           },
           {
-            label: "Gerçekleşen K/Z",
-            value: money(analysis.totals.realizedPnl),
-            className: analysis.totals.realizedPnl >= 0 ? "good" : "bad",
-          },
-          {
             label: "Ort. Taşıma Gün",
             value: daysFmt(analysis.totals.portfolioOpenAvgDays),
           },
           {
+            label: "Günlük K/Z",
+            ...pnlDisplay(analysis.totals.dailyPnl, analysis.totals.dailyPnlPct),
+          },
+          {
             label: "Açık K/Z",
-            value: money(analysis.totals.unrealizedPnl),
-            className: analysis.totals.unrealizedPnl >= 0 ? "good" : "bad",
+            ...pnlDisplay(analysis.totals.unrealizedPnl, analysis.totals.unrealizedPnlPct),
           },
           {
-            label: "Açık %K/Z",
-            value: pctFmt(analysis.totals.unrealizedPnlPct),
-            className: (analysis.totals.unrealizedPnlPct ?? 0) >= 0 ? "good" : "bad",
+            label: "Toplam K/Z",
+            ...pnlDisplay(analysis.totals.totalPnl, analysis.totals.totalPnlPct),
           },
           {
-            label: "Toplam %K/Z",
-            value: pctFmt(analysis.totals.totalPnlPct),
-            className: (analysis.totals.totalPnlPct ?? 0) >= 0 ? "good" : "bad",
+            label: "Gerçekleşen K/Z",
+            ...pnlDisplay(analysis.totals.realizedPnl, analysis.totals.realizedPnlPct),
           },
         ];
 
@@ -1825,7 +1854,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               <div class="kpi">
                 <span class="kpi-label">${item.label}</span>
                 <div class="kpi-value ${item.className || ""}">${item.value}</div>
-                <div class="kpi-note">${item.note || ""}</div>
+                ${item.note ? `<div class="kpi-note">${item.note}</div>` : ""}
               </div>
             `
           )
