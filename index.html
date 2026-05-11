@@ -1937,7 +1937,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num ${((row.pnlPct ?? row.openPnlPct) ?? 0) >= 0 ? "good" : "bad"}">${pctFmt(row.pnlPct ?? row.openPnlPct)}</td>
                 <td class="num detail-col">${daysFmt(row.closedAvgDays)}</td>
                 <td class="num detail-col">${daysFmt(row.openAvgDays)}</td>
-                <td class="num detail-col">${money(row.avgCost)}</td>
+                <td class="num detail-col">${marketPriceFmt(row.avgCost)}</td>
               </tr>
             `
           )
@@ -1956,7 +1956,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td>${row.symbol}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
                 <td class="num detail-col">${marketPriceFmt(row.currentPrice)}</td>
-                <td class="num detail-col">${money(row.avgCost)}</td>
+                <td class="num detail-col">${marketPriceFmt(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num ${(row.openPnlPct ?? 0) >= 0 ? "good" : "bad"}">${pctFmt(row.openPnlPct)}</td>
                 <td class="num detail-col ${(row.dailyPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.dailyPnl)}</td>
