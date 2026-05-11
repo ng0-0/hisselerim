@@ -703,6 +703,7 @@
                 <small id="summaryMeta">Veri bekleniyor.</small>
               </div>
               <div class="actions">
+                <button type="button" id="btnRefreshPrices" class="ghost table-mode-toggle">Fiyatları Güncelle</button>
                 <button type="button" id="btnToggleTableMode" class="ghost table-mode-toggle">Detaylı Görünüm</button>
                 <span class="chip" id="recordCountChip">0 kayit</span>
               </div>
@@ -871,6 +872,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       const els = {
         mainLayout: document.getElementById("mainLayout"),
         btnToggleSidebar: document.getElementById("btnToggleSidebar"),
+        btnRefreshPrices: document.getElementById("btnRefreshPrices"),
         btnToggleTableMode: document.getElementById("btnToggleTableMode"),
         appKeyInput: document.getElementById("appKeyInput"),
         rememberDropbox: document.getElementById("rememberDropbox"),
@@ -1503,7 +1505,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         return result;
       }
 
-      async function loadLivePrices(symbols) {
+      async function loadLivePrices(symbols, force = false) {
         const uniqueSymbols = [...new Set((symbols || []).flatMap((value) => getMarketSymbolCandidates(value)))];
         if (!uniqueSymbols.length) {
           state.livePrices = {};
@@ -1518,7 +1520,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const snapshotCurrentCloses = state.data.marketSnapshots?.currentCloses || {};
         const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
 
-        if (state.lastPriceKey === key && state.livePriceStatus === "ready") return;
+        if (!force && state.lastPriceKey === key && state.livePriceStatus === "ready") return;
 
         state.livePriceStatus = "loading";
         try {
@@ -2030,12 +2032,17 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         els.recordCountChip.textContent = `${state.data.transactions.length} kayit`;
       }
 
-      async function refreshPricesAndRender() {
+      async function refreshPricesAndRender(force = false) {
         const symbols = [...new Set(state.data.transactions.map((tx) => (tx.symbol || "").toUpperCase()).filter(Boolean))];
         renderAll();
-        await loadLivePrices(symbols);
+        await loadLivePrices(symbols, force);
         state.livePriceCheckedAt = new Date().toISOString();
         renderAll();
+      }
+
+      async function refreshPricesManually() {
+        setStatus("Canli fiyatlar yeniden aliniyor...", "warn");
+        await refreshPricesAndRender(true);
       }
 
       function resetForm() {
@@ -2172,6 +2179,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       function bindEvents() {
         document.getElementById("btnResetForm").addEventListener("click", resetForm);
         els.btnToggleSidebar.addEventListener("click", toggleSidebar);
+        els.btnRefreshPrices.addEventListener("click", refreshPricesManually);
         els.btnToggleTableMode.addEventListener("click", toggleTableMode);
         els.btnConnectDropbox.addEventListener("click", connectDropbox);
         els.btnDisconnectDropbox.addEventListener("click", disconnectDropbox);
