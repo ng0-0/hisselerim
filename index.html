@@ -1515,56 +1515,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
 
         const key = uniqueSymbols.sort().join("|");
-        const today = todayLocalDateKey();
         const snapshotCurrentCloses = state.data.marketSnapshots?.currentCloses || {};
         const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
-        const hasTodaySnapshot =
-          state.data.marketSnapshots?.currentDate === today &&
-          uniqueSymbols.every((symbol) => Number.isFinite(snapshotCurrentCloses[symbol]));
-
-        if (hasTodaySnapshot) {
-          if (!state.data.marketSnapshots.currentLoadedAt) {
-            state.data.marketSnapshots.currentLoadedAt = currentSnapshotDate
-              ? `${currentSnapshotDate}T00:00:00`
-              : new Date().toISOString();
-            persistLocalData();
-          }
-          state.livePrices = Object.fromEntries(
-            uniqueSymbols.filter((symbol) => Number.isFinite(snapshotCurrentCloses[symbol])).map((symbol) => [symbol, snapshotCurrentCloses[symbol]])
-          );
-          const cachedPreviousCloses = Object.fromEntries(
-            uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
-          );
-          state.liveDailyChangePcts = {};
-          state.livePreviousCloseDebug = Object.fromEntries(uniqueSymbols.map((symbol) => [symbol, "snapshot-only"]));
-          if (Object.keys(cachedPreviousCloses).length !== uniqueSymbols.length) {
-            const mynetDailyChanges = await fetchMynetDailyChanges(uniqueSymbols);
-            state.liveDailyChangePcts = mynetDailyChanges;
-            await Promise.all(
-              uniqueSymbols.map(async (symbol) => {
-                const currentPrice = state.livePrices[symbol];
-                const changePct = mynetDailyChanges[symbol];
-                if (Number.isFinite(currentPrice) && Number.isFinite(changePct) && changePct > -100) {
-                  const derivedPreviousClose = currentPrice / (1 + changePct / 100);
-                  if (Number.isFinite(derivedPreviousClose) && derivedPreviousClose > 0) {
-                    cachedPreviousCloses[symbol] = derivedPreviousClose;
-                    return;
-                  }
-                } else if (!Number.isFinite(cachedPreviousCloses[symbol])) {
-                  const yahooPreviousClose = await fetchYahooPreviousClose(symbol);
-                  if (Number.isFinite(yahooPreviousClose)) {
-                    cachedPreviousCloses[symbol] = yahooPreviousClose;
-                    state.livePreviousCloseDebug[symbol] = "yahoo-fallback";
-                  }
-                }
-              })
-            );
-          }
-          state.livePreviousCloses = cachedPreviousCloses;
-          state.livePriceStatus = "ready";
-          state.lastPriceKey = key;
-          return;
-        }
 
         if (state.lastPriceKey === key && state.livePriceStatus === "ready") return;
 
@@ -1620,6 +1572,20 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           state.livePriceStatus = "ready";
           state.lastPriceKey = key;
         } catch (error) {
+          if (Object.keys(snapshotCurrentCloses).length) {
+            state.livePrices = Object.fromEntries(
+              uniqueSymbols
+                .filter((symbol) => Number.isFinite(snapshotCurrentCloses[symbol]))
+                .map((symbol) => [symbol, snapshotCurrentCloses[symbol]])
+            );
+          }
+          if (Object.keys(snapshotPreviousCloses).length) {
+            state.livePreviousCloses = Object.fromEntries(
+              uniqueSymbols
+                .filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol]))
+                .map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
+            );
+          }
           state.livePriceStatus = "error";
           console.error("live price error", error);
         }
