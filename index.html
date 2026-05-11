@@ -2159,6 +2159,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         updateTableMode();
       }
 
+      function detectDefaultCompactTableMode() {
+        try {
+          const isNarrowScreen = window.matchMedia("(max-width: 768px)").matches;
+          const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+          return isNarrowScreen || isCoarsePointer;
+        } catch (error) {
+          return true;
+        }
+      }
+
       function bindEvents() {
         document.getElementById("btnResetForm").addEventListener("click", resetForm);
         els.btnToggleSidebar.addEventListener("click", toggleSidebar);
@@ -2175,6 +2185,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
       async function init() {
         loadLocalState();
+        state.compactTableMode = detectDefaultCompactTableMode();
         updateSidebarToggle();
         updateTableMode();
         bindEvents();
