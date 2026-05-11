@@ -1448,44 +1448,56 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
-      async function fetchCnnTurkDailyChanges(symbols) {
+      async function fetchMynetDailyChanges(symbols) {
         const result = {};
         const debug = {};
         try {
-          const res = await fetch("https://finans.cnnturk.com/borsa/gecmis-kapanislar", { cache: "no-store" });
+          const res = await fetch("https://finans.mynet.com/borsa/canliborsa/#ALL", { cache: "no-store" });
           const html = await res.text();
-          const doc = new DOMParser().parseFromString(html, "text/html");
-          const text = doc.body?.innerText || "";
 
           const parseTrNumber = (value) => {
             if (!value) return null;
-            const normalized = String(value).replace(/\./g, "").replace(",", ".");
+            const normalized = String(value).trim().replace(/\./g, "").replace(",", ".");
             const num = Number(normalized);
             return Number.isFinite(num) ? num : null;
           };
 
           symbols.forEach((symbol) => {
-            const pattern = new RegExp(
-              `\\b${symbol}\\b\\s+([\\d.]+,\\d+)\\s+([\\d.]+,\\d+)\\s+(-?[\\d.]+,\\d+)\\s*%\\s+([\\d.]+,\\d+)\\s+([\\d.]+,\\d+)`,
-              "i"
-            );
-            const match = text.match(pattern);
-            if (!match) {
+            const marker = `|${symbol}|`;
+            const markerIndex = html.indexOf(marker);
+            if (markerIndex === -1) {
               debug[symbol] = "no-match";
               return;
             }
 
-            const changePct = parseTrNumber(match[3]);
-            if (Number.isFinite(changePct) && changePct > -100) {
+            const startIndex = html.lastIndexOf("_|H", markerIndex);
+            const endIndex = html.indexOf("/|_", markerIndex);
+            if (startIndex === -1 || endIndex === -1) {
+              debug[symbol] = "bad-segment";
+              return;
+            }
+
+            const segment = html.slice(startIndex, endIndex + 2);
+            const parts = segment.split("|");
+            const symbolIndex = parts.findIndex((part) => part.trim().toUpperCase() === symbol);
+            if (symbolIndex === -1) {
+              debug[symbol] = "symbol-missing";
+              return;
+            }
+
+            const currentValue = parts[symbolIndex - 12] ?? null;
+            const changeValue = parts[symbolIndex - 9] ?? null;
+            const changePct = parseTrNumber(changeValue);
+            if (Number.isFinite(changePct) && Math.abs(changePct) < 100) {
               result[symbol] = changePct;
-              debug[symbol] = `ok:${match[1]}|${match[2]}|%${match[3]}`;
+              debug[symbol] = `ok:${currentValue ?? "-"}|%${changeValue ?? "-"}`;
             } else {
               debug[symbol] = "invalid-number";
             }
           });
           state.livePreviousCloseDebug = debug;
         } catch (error) {
-          console.warn("cnnturk previous close error", error);
+          console.warn("mynet daily change error", error);
           state.livePreviousCloseDebug = Object.fromEntries(symbols.map((symbol) => [symbol, `error:${String(error)}`]));
         }
         return result;
@@ -1526,12 +1538,12 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           state.liveDailyChangePcts = {};
           state.livePreviousCloseDebug = Object.fromEntries(uniqueSymbols.map((symbol) => [symbol, "snapshot-only"]));
           if (Object.keys(cachedPreviousCloses).length !== uniqueSymbols.length) {
-            const cnnTurkDailyChanges = await fetchCnnTurkDailyChanges(uniqueSymbols);
-            state.liveDailyChangePcts = cnnTurkDailyChanges;
+            const mynetDailyChanges = await fetchMynetDailyChanges(uniqueSymbols);
+            state.liveDailyChangePcts = mynetDailyChanges;
             await Promise.all(
               uniqueSymbols.map(async (symbol) => {
                 const currentPrice = state.livePrices[symbol];
-                const changePct = cnnTurkDailyChanges[symbol];
+                const changePct = mynetDailyChanges[symbol];
                 if (Number.isFinite(currentPrice) && Number.isFinite(changePct) && changePct > -100) {
                   const derivedPreviousClose = currentPrice / (1 + changePct / 100);
                   if (Number.isFinite(derivedPreviousClose) && derivedPreviousClose > 0) {
@@ -1581,14 +1593,14 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             }
           });
 
-          const cnnTurkDailyChanges = await fetchCnnTurkDailyChanges(uniqueSymbols);
-          state.liveDailyChangePcts = cnnTurkDailyChanges;
+          const mynetDailyChanges = await fetchMynetDailyChanges(uniqueSymbols);
+          state.liveDailyChangePcts = mynetDailyChanges;
 
           await Promise.all(
             uniqueSymbols.map(async (symbol) => {
               let previousClose = null;
               const currentPrice = next[symbol];
-              const changePct = cnnTurkDailyChanges[symbol];
+              const changePct = mynetDailyChanges[symbol];
               if (Number.isFinite(currentPrice) && Number.isFinite(changePct) && changePct > -100) {
                 previousClose = currentPrice / (1 + changePct / 100);
               } else {
