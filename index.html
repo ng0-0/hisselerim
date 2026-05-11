@@ -1602,6 +1602,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
+      const DEFAULT_BROKER_COMMISSION_RATE = 0.002;
+
       function computeTransactionAmount(tx) {
         if (tx.type === "BUY" && tx.zeroCost) return 0;
 
@@ -1609,9 +1611,15 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
         const qty = tx.quantity || 0;
         const price = tx.price || 0;
-        const commission = tx.commission || 0;
-        const tax = tx.tax || 0;
         const gross = qty * price;
+        const explicitCommission = Number(tx.commission) || 0;
+        const commission =
+          tx.type === "BUY" || tx.type === "SELL"
+            ? explicitCommission > 0
+              ? explicitCommission
+              : gross * DEFAULT_BROKER_COMMISSION_RATE
+            : explicitCommission;
+        const tax = tx.tax || 0;
 
         if (tx.type === "BUY") return -(gross + commission + tax);
         if (tx.type === "SELL") return gross - commission - tax;
