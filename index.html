@@ -921,6 +921,15 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} TL`;
       }
 
+      function marketPriceFmt(value) {
+        if (value == null || Number.isNaN(value)) return "-";
+        const digits = value > 400 ? 0 : value >= 100 ? 1 : 2;
+        return `${value.toLocaleString("tr-TR", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        })} TL`;
+      }
+
       function numberFmt(value, digits = 0) {
         if (value == null || Number.isNaN(value)) return "-";
         return value.toLocaleString("tr-TR", {
@@ -1919,7 +1928,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
                 <td class="num">${numberFmt(row.buyQty, 0)}</td>
                 <td class="num">${numberFmt(row.sellQty, 0)}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
-                <td class="num detail-col">${money(row.currentPrice)}</td>
+                <td class="num detail-col">${marketPriceFmt(row.currentPrice)}</td>
                 <td class="num detail-col">${money(row.buyAmount)}</td>
                 <td class="num detail-col">${money(row.sellAmount)}</td>
                 <td class="num ${row.realizedPnl >= 0 ? "good" : "bad"}">${money(row.realizedPnl)}</td>
@@ -1946,7 +1955,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
               <tr>
                 <td>${row.symbol}</td>
                 <td class="num">${numberFmt(row.openQty, 0)}</td>
-                <td class="num detail-col">${money(row.currentPrice)}</td>
+                <td class="num detail-col">${marketPriceFmt(row.currentPrice)}</td>
                 <td class="num detail-col">${money(row.avgCost)}</td>
                 <td class="num ${(row.unrealizedPnl ?? 0) >= 0 ? "good" : "bad"}">${money(row.unrealizedPnl)}</td>
                 <td class="num ${(row.openPnlPct ?? 0) >= 0 ? "good" : "bad"}">${pctFmt(row.openPnlPct)}</td>
