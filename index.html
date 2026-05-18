@@ -800,12 +800,12 @@
           </section>
 
           <section class="panel">
-            <button type="button" id="btnToggleYearlyAnalysis" class="side-toggle">Son 1 Yillik Analiz</button>
+            <button type="button" id="btnToggleYearlyAnalysis" class="side-toggle">Son 1 Yıllık Analiz</button>
             <div id="yearlyAnalysisPanel" style="display:none; margin-top:16px;">
               <div class="toolbar">
                 <div>
-                  <h2 style="margin-bottom:4px;">Son 1 Yillik Analiz</h2>
-                  <small>Son 365 gundeki gerceklesen kar ve ortalama kullanilan sermaye.</small>
+                  <h2 style="margin-bottom:4px;">Son 1 Yıllık Analiz</h2>
+                  <small>Son 365 gündeki gerçekleşen kar ve ortalama kullanılan sermaye.</small>
                 </div>
               </div>
               <div class="kpi-grid" id="yearlyAnalysisGrid"></div>
@@ -2023,16 +2023,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       function renderYearlyAnalysis(metrics) {
         const cards = [
           {
-            label: "Son 1 Yil K/Z",
+            label: "Son 1 Yıl K/Z",
             value: money(metrics.realizedPnl),
             className: (metrics.realizedPnl ?? 0) >= 0 ? "good" : "bad",
           },
           {
-            label: "Ort. Kullanilan Sermaye",
+            label: "Ort. Kullanılan Sermaye",
             value: money(metrics.averageUsedCapital),
           },
           {
-            label: "Sermaye Verimliligi",
+            label: "Sermaye Verimliliği",
             value: pctFmt(metrics.capitalEfficiencyPct),
             className: (metrics.capitalEfficiencyPct ?? 0) >= 0 ? "good" : "bad",
           },
@@ -2315,7 +2315,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
       function toggleYearlyAnalysis() {
         const isOpen = els.yearlyAnalysisPanel.style.display !== "none";
         els.yearlyAnalysisPanel.style.display = isOpen ? "none" : "block";
-        els.btnToggleYearlyAnalysis.textContent = isOpen ? "Son 1 Yillik Analiz" : "Gizle";
+        els.btnToggleYearlyAnalysis.textContent = isOpen ? "Son 1 Yıllık Analiz" : "Gizle";
         els.btnToggleYearlyAnalysis.classList.toggle("ghost", isOpen);
       }
 
