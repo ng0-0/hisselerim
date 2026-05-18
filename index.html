@@ -799,6 +799,19 @@
             </div>
           </section>
 
+          <section class="panel">
+            <button type="button" id="btnToggleYearlyAnalysis" class="side-toggle">Son 1 Yillik Analiz</button>
+            <div id="yearlyAnalysisPanel" style="display:none; margin-top:16px;">
+              <div class="toolbar">
+                <div>
+                  <h2 style="margin-bottom:4px;">Son 1 Yillik Analiz</h2>
+                  <small>Son 365 gundeki gerceklesen kar ve ortalama kullanilan sermaye.</small>
+                </div>
+              </div>
+              <div class="kpi-grid" id="yearlyAnalysisGrid"></div>
+            </div>
+          </section>
+
           <section class="panel status-panel">
             <h2>Durum</h2>
             <div class="status-toolbar">
@@ -874,6 +887,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         btnToggleSidebar: document.getElementById("btnToggleSidebar"),
         btnRefreshPrices: document.getElementById("btnRefreshPrices"),
         btnToggleTableMode: document.getElementById("btnToggleTableMode"),
+        btnToggleYearlyAnalysis: document.getElementById("btnToggleYearlyAnalysis"),
         appKeyInput: document.getElementById("appKeyInput"),
         rememberDropbox: document.getElementById("rememberDropbox"),
         btnConnectDropbox: document.getElementById("btnConnectDropbox"),
@@ -884,6 +898,8 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         summaryMeta: document.getElementById("summaryMeta"),
         recordCountChip: document.getElementById("recordCountChip"),
         kpiGrid: document.getElementById("kpiGrid"),
+        yearlyAnalysisPanel: document.getElementById("yearlyAnalysisPanel"),
+        yearlyAnalysisGrid: document.getElementById("yearlyAnalysisGrid"),
         summaryTableBody: document.querySelector("#summaryTable tbody"),
         openTableBody: document.querySelector("#openTable tbody"),
         historyTableBody: document.querySelector("#historyTable tbody"),
@@ -1923,6 +1939,121 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           .join("");
       }
 
+      function analyzeTrailingYear(transactions, currentPortfolioValue = 0) {
+        const now = new Date();
+        const periodEnd = now;
+        const periodStart = new Date(now.getTime() - 365 * 86400000);
+        const sorted = [...transactions].sort((a, b) => new Date(a.tradeDate) - new Date(b.tradeDate));
+        const positions = new Map();
+        let openCostState = 0;
+        let realizedPnl = 0;
+        let weightedOpenCostSum = 0;
+        let cursor = periodStart;
+
+        function getLots(symbol) {
+          if (!positions.has(symbol)) positions.set(symbol, []);
+          return positions.get(symbol);
+        }
+
+        function applyTransaction(tx, trackRealized) {
+          const symbol = (tx.symbol || "").toUpperCase();
+          const amount = computeTransactionAmount(tx);
+          const qty = tx.quantity || 0;
+
+          if (tx.type === "BUY") {
+            const unitCost = qty ? Math.abs(amount) / qty : 0;
+            getLots(symbol).push({
+              qty,
+              unitCost,
+              tradeDate: new Date(tx.tradeDate),
+            });
+            openCostState += qty * unitCost;
+            return;
+          }
+
+          if (tx.type === "SELL") {
+            let remaining = qty;
+            const proceedsUnit = remaining ? amount / remaining : 0;
+            const lots = getLots(symbol);
+            while (remaining > 1e-9 && lots.length) {
+              const lot = lots[0];
+              const usedQty = Math.min(remaining, lot.qty);
+              const costBasis = usedQty * lot.unitCost;
+              const proceeds = usedQty * proceedsUnit;
+              if (trackRealized) realizedPnl += proceeds - costBasis;
+              openCostState -= costBasis;
+              lot.qty -= usedQty;
+              remaining -= usedQty;
+              if (lot.qty <= 1e-9) lots.shift();
+            }
+          }
+        }
+
+        for (const tx of sorted) {
+          const txDate = new Date(tx.tradeDate);
+          if (txDate < periodStart) {
+            applyTransaction(tx, false);
+            continue;
+          }
+
+          if (txDate > periodEnd) break;
+
+          const deltaDays = Math.max((txDate - cursor) / 86400000, 0);
+          weightedOpenCostSum += openCostState * deltaDays;
+          applyTransaction(tx, true);
+          cursor = txDate;
+        }
+
+        const tailDays = Math.max((periodEnd - cursor) / 86400000, 0);
+        weightedOpenCostSum += openCostState * tailDays;
+
+        const periodDays = Math.max((periodEnd - periodStart) / 86400000, 1);
+        const averageUsedCapital = weightedOpenCostSum / periodDays;
+        const capitalEfficiencyPct = averageUsedCapital ? (realizedPnl / averageUsedCapital) * 100 : null;
+        const usageRatioPct = currentPortfolioValue ? (averageUsedCapital / currentPortfolioValue) * 100 : null;
+
+        return {
+          realizedPnl,
+          averageUsedCapital,
+          capitalEfficiencyPct,
+          usageRatioPct,
+        };
+      }
+
+      function renderYearlyAnalysis(metrics) {
+        const cards = [
+          {
+            label: "Son 1 Yil K/Z",
+            value: money(metrics.realizedPnl),
+            className: (metrics.realizedPnl ?? 0) >= 0 ? "good" : "bad",
+          },
+          {
+            label: "Ort. Kullanilan Sermaye",
+            value: money(metrics.averageUsedCapital),
+          },
+          {
+            label: "Sermaye Verimliligi",
+            value: pctFmt(metrics.capitalEfficiencyPct),
+            className: (metrics.capitalEfficiencyPct ?? 0) >= 0 ? "good" : "bad",
+          },
+          {
+            label: "Ort. Kullanim Orani",
+            value: pctFmt(metrics.usageRatioPct),
+          },
+        ];
+
+        els.yearlyAnalysisGrid.innerHTML = cards
+          .map(
+            (item) => `
+              <div class="kpi">
+                <span class="kpi-label">${item.label}</span>
+                <div class="kpi-value ${item.className || ""}">${item.value}</div>
+              </div>
+            `
+          )
+          .join("");
+      }
+
       function renderSummaryTable(rows) {
         if (!rows.length) {
           els.summaryTableBody.innerHTML = `<tr><td colspan="14"><div class="empty">Henuz islem yok.</div></td></tr>`;
@@ -2011,7 +2142,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const snapshotPreviousCloses = state.data.marketSnapshots?.previousCloses || {};
         const effectivePreviousCloses = { ...snapshotPreviousCloses, ...state.livePreviousCloses };
         const analysis = analyzePortfolio(state.data.transactions, state.livePrices, effectivePreviousCloses, state.liveDailyChangePcts);
+        const yearlyAnalysis = analyzeTrailingYear(state.data.transactions, analysis.totals.openMarketValue);
         renderKpis(analysis);
+        renderYearlyAnalysis(yearlyAnalysis);
         renderSummaryTable(analysis.symbolRows);
         renderOpenTable(analysis.openRows);
         renderHistoryTable(state.data.transactions);
@@ -2183,6 +2316,13 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         updateTableMode();
       }
 
+      function toggleYearlyAnalysis() {
+        const isOpen = els.yearlyAnalysisPanel.style.display !== "none";
+        els.yearlyAnalysisPanel.style.display = isOpen ? "none" : "block";
+        els.btnToggleYearlyAnalysis.textContent = isOpen ? "Son 1 Yillik Analiz" : "Gizle";
+        els.btnToggleYearlyAnalysis.classList.toggle("ghost", isOpen);
+      }
+
       function detectDefaultCompactTableMode() {
         try {
           const isNarrowScreen = window.matchMedia("(max-width: 768px)").matches;
@@ -2198,6 +2338,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         els.btnToggleSidebar.addEventListener("click", toggleSidebar);
         els.btnRefreshPrices.addEventListener("click", refreshPricesManually);
         els.btnToggleTableMode.addEventListener("click", toggleTableMode);
+        els.btnToggleYearlyAnalysis.addEventListener("click", toggleYearlyAnalysis);
         els.btnConnectDropbox.addEventListener("click", connectDropbox);
         els.btnDisconnectDropbox.addEventListener("click", disconnectDropbox);
         els.txForm.addEventListener("submit", saveTransaction);
