@@ -1700,6 +1700,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           return perSymbol.get(symbol);
         }
 
+        function getLotsTotals(lots) {
+          let qty = 0;
+          let cost = 0;
+          lots.forEach((lot) => {
+            qty += lot.qty || 0;
+            cost += (lot.qty || 0) * (lot.unitCost || 0);
+          });
+          return { qty, cost };
+        }
+
         for (const tx of sorted) {
           const amount = computeTransactionAmount(tx);
           tx._computedAmount = amount;
@@ -1712,10 +1722,18 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             totals.buyAmount += Math.abs(amount);
 
             const qty = tx.quantity || 0;
-            const unitCost = qty ? Math.abs(amount) / qty : 0;
-            positions.get(symbol).push({
+            const lots = positions.get(symbol);
+            const { qty: currentQty, cost: currentCost } = getLotsTotals(lots);
+            const nextQty = currentQty + qty;
+            const blendedUnitCost = nextQty ? (currentCost + Math.abs(amount)) / nextQty : 0;
+
+            lots.forEach((lot) => {
+              lot.unitCost = blendedUnitCost;
+            });
+
+            lots.push({
               qty,
-              unitCost,
+              unitCost: blendedUnitCost,
               marketPrice: tx.referencePrice ?? tx.price ?? 0,
               tradeDate: new Date(tx.tradeDate),
             });
@@ -1728,27 +1746,44 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             item.sellAmount += amount;
             totals.sellAmount += amount;
 
-            let remaining = tx.quantity || 0;
-            const proceedsUnit = remaining ? amount / remaining : 0;
+            const sellQty = tx.quantity || 0;
+            const proceedsUnit = sellQty ? amount / sellQty : 0;
             const saleDate = new Date(tx.tradeDate);
             const lots = positions.get(symbol);
+            const { qty: currentQty, cost: currentCost } = getLotsTotals(lots);
+            const effectiveSellQty = Math.min(sellQty, currentQty);
 
-            while (remaining > 1e-9 && lots.length) {
-              const lot = lots[0];
-              const usedQty = Math.min(remaining, lot.qty);
-              const costBasis = usedQty * lot.unitCost;
-              const proceeds = usedQty * proceedsUnit;
-              const holdingDays = Math.max((saleDate - lot.tradeDate) / 86400000, 0);
+            if (effectiveSellQty > 1e-9 && currentQty > 1e-9) {
+              const avgUnitCost = currentCost / currentQty;
+              const sellRatio = effectiveSellQty / currentQty;
 
-              item.realizedPnl += proceeds - costBasis;
-              item.closedCostBasis += costBasis;
-              item.closedHoldingWeightedDays += holdingDays * usedQty;
-              item.closedHoldingQty += usedQty;
+              lots.forEach((lot) => {
+                const usedQty = lot.qty * sellRatio;
+                if (usedQty <= 1e-9) return;
+                const holdingDays = Math.max((saleDate - lot.tradeDate) / 86400000, 0);
+                const costBasis = usedQty * avgUnitCost;
+                const proceeds = usedQty * proceedsUnit;
 
-              lot.qty -= usedQty;
-              remaining -= usedQty;
+                item.realizedPnl += proceeds - costBasis;
+                item.closedCostBasis += costBasis;
+                item.closedHoldingWeightedDays += holdingDays * usedQty;
+                item.closedHoldingQty += usedQty;
 
-              if (lot.qty <= 1e-9) lots.shift();
+                lot.qty -= usedQty;
+              });
+
+              const remainingQty = currentQty - effectiveSellQty;
+              const remainingCost = currentCost - effectiveSellQty * avgUnitCost;
+              const nextUnitCost = remainingQty > 1e-9 ? remainingCost / remainingQty : 0;
+
+              for (let i = lots.length - 1; i >= 0; i -= 1) {
+                const lot = lots[i];
+                if (lot.qty <= 1e-9) {
+                  lots.splice(i, 1);
+                  continue;
+                }
+                lot.unitCost = nextUnitCost;
+              }
             }
 
             totals.realizedPnl += item.realizedPnl - (item._lastRealizedPnl || 0);
@@ -1955,36 +1990,69 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           return positions.get(symbol);
         }
 
+        function getLotsTotals(lots) {
+          let qty = 0;
+          let cost = 0;
+          lots.forEach((lot) => {
+            qty += lot.qty || 0;
+            cost += (lot.qty || 0) * (lot.unitCost || 0);
+          });
+          return { qty, cost };
+        }
+
         function applyTransaction(tx, trackRealized) {
           const symbol = (tx.symbol || "").toUpperCase();
           const amount = computeTransactionAmount(tx);
           const qty = tx.quantity || 0;
 
           if (tx.type === "BUY") {
-            const unitCost = qty ? Math.abs(amount) / qty : 0;
-            getLots(symbol).push({
+            const lots = getLots(symbol);
+            const { qty: currentQty, cost: currentCost } = getLotsTotals(lots);
+            const nextQty = currentQty + qty;
+            const blendedUnitCost = nextQty ? (currentCost + Math.abs(amount)) / nextQty : 0;
+            lots.forEach((lot) => {
+              lot.unitCost = blendedUnitCost;
+            });
+            lots.push({
               qty,
-              unitCost,
+              unitCost: blendedUnitCost,
               tradeDate: new Date(tx.tradeDate),
             });
-            openCostState += qty * unitCost;
+            openCostState += Math.abs(amount);
             return;
           }
 
           if (tx.type === "SELL") {
-            let remaining = qty;
-            const proceedsUnit = remaining ? amount / remaining : 0;
             const lots = getLots(symbol);
-            while (remaining > 1e-9 && lots.length) {
-              const lot = lots[0];
-              const usedQty = Math.min(remaining, lot.qty);
-              const costBasis = usedQty * lot.unitCost;
-              const proceeds = usedQty * proceedsUnit;
-              if (trackRealized) realizedPnl += proceeds - costBasis;
-              openCostState -= costBasis;
-              lot.qty -= usedQty;
-              remaining -= usedQty;
-              if (lot.qty <= 1e-9) lots.shift();
+            const { qty: currentQty, cost: currentCost } = getLotsTotals(lots);
+            const effectiveSellQty = Math.min(qty, currentQty);
+            const proceedsUnit = qty ? amount / qty : 0;
+
+            if (effectiveSellQty > 1e-9 && currentQty > 1e-9) {
+              const avgUnitCost = currentCost / currentQty;
+              const sellRatio = effectiveSellQty / currentQty;
+              const soldCost = effectiveSellQty * avgUnitCost;
+              const soldProceeds = effectiveSellQty * proceedsUnit;
+
+              if (trackRealized) realizedPnl += soldProceeds - soldCost;
+              openCostState -= soldCost;
+
+              lots.forEach((lot) => {
+                lot.qty -= lot.qty * sellRatio;
+              });
+
+              const remainingQty = currentQty - effectiveSellQty;
+              const remainingCost = currentCost - soldCost;
+              const nextUnitCost = remainingQty > 1e-9 ? remainingCost / remainingQty : 0;
+
+              for (let i = lots.length - 1; i >= 0; i -= 1) {
+                const lot = lots[i];
+                if (lot.qty <= 1e-9) {
+                  lots.splice(i, 1);
+                  continue;
+                }
+                lot.unitCost = nextUnitCost;
+              }
             }
           }
         }
