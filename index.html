@@ -1444,15 +1444,28 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
+      async function fetchMarketData(url, options = {}, json = true) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        try {
+          const response = await fetch(url, { ...options, cache: "no-store", signal: controller.signal });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return json ? await response.json() : await response.text();
+        } catch (error) {
+          throw new Error(`${new URL(url).hostname}: ${error.name === "AbortError" ? "15 saniye içinde yanıt alınamadı" : error.message}`);
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
       // Yahoo is used only for previous close; current price continues to come from Fintables.
       async function fetchYahooPreviousClose(symbol) {
         try {
           const yahooSymbol = `${symbol}.IS`;
-          const res = await fetch(
+          const data = await fetchMarketData(
             `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=5d&interval=1d`,
             { cache: "no-store" }
           );
-          const data = await res.json();
           const result = data?.chart?.result?.[0];
           const meta = result?.meta || {};
           const quoteCloses = result?.indicators?.quote?.[0]?.close || [];
@@ -1479,8 +1492,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const result = {};
         const debug = {};
         try {
-          const res = await fetch("https://finans.mynet.com/borsa/canliborsa/#ALL", { cache: "no-store" });
-          const html = await res.text();
+          const html = await fetchMarketData("https://finans.mynet.com/borsa/canliborsa/#ALL", {}, false);
 
           const parseTrNumber = (value) => {
             if (!value) return null;
@@ -1548,13 +1560,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         if (!force && state.lastPriceKey === key && state.livePriceStatus === "ready") return;
 
         state.livePriceStatus = "loading";
+        state.livePriceError = "";
+        state.livePreviousCloseDebug = { Fintables: "Fiyat isteği gönderiliyor..." };
+        renderAll();
         try {
           const next = {};
           const previousCloses = Object.fromEntries(
             uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
           );
 
-          const res = await fetch("https://api.fintables.com/radar/", {
+          const json = await fetchMarketData("https://api.fintables.com/radar/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1563,7 +1578,6 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             }),
           });
 
-          const json = await res.json();
           (json.data || []).forEach((row) => {
             const symbol = String(row.code || "").toUpperCase();
             const price = Number(row.close);
@@ -1572,6 +1586,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             }
           });
 
+          if (!Object.keys(next).length) throw new Error("Fintables: Eşleşen geçerli fiyat bulunamadı.");
+          state.livePrices = next;
+          updateMarketSnapshots(next);
           const mynetDailyChanges = await fetchMynetDailyChanges(uniqueSymbols);
           state.liveDailyChangePcts = mynetDailyChanges;
 
@@ -1614,6 +1631,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             );
           }
           state.livePriceStatus = "error";
+          state.livePriceError = String(error.message || error);
+          state.liveDailyChangePcts = {};
+          state.livePreviousCloseDebug = { "Fiyat kaynağı hatası": state.livePriceError };
           console.error("live price error", error);
         }
       }
@@ -2236,7 +2256,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         if (state.livePriceStatus === "loading") {
           priceText = `${priceText} | Güncelleniyor`;
         } else if (state.livePriceStatus === "error") {
-          priceText = `${priceText} | Güncel fiyat alınamadı`;
+          priceText = "Güncel fiyat alınamadı; fiyatlar güncel olarak doğrulanamadı.";
         }
         els.summaryMeta.innerHTML = [
           updatedText,
@@ -2250,13 +2270,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         const symbols = [...new Set(state.data.transactions.map((tx) => (tx.symbol || "").toUpperCase()).filter(Boolean))];
         renderAll();
         await loadLivePrices(symbols, force);
-        state.livePriceCheckedAt = new Date().toISOString();
+        if (state.livePriceStatus === "ready") state.livePriceCheckedAt = new Date().toISOString();
         renderAll();
       }
 
       async function refreshPricesManually() {
         setStatus("Canli fiyatlar yeniden aliniyor...", "warn");
         await refreshPricesAndRender(true);
+        setStatus(state.livePriceStatus === "error"
+          ? `Fiyat yenileme başarısız.\n${state.livePriceError}\nEski/referans fiyatlar gösteriliyor. Ağ hatası tek başına bölgesel engeli kanıtlamaz.`
+          : "Fiyat yenileme tamamlandı.", state.livePriceStatus === "error" ? "err" : "ok");
       }
 
       function resetForm() {
