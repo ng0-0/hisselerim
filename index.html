@@ -1488,8 +1488,9 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
         }
       }
 
-      async function fetchMynetDailyChanges(symbols) {
-        const result = {};
+      async function fetchMynetMarketData(symbols) {
+        const prices = {};
+        const changes = {};
         const debug = {};
         try {
           const html = await fetchMarketData("https://finans.mynet.com/borsa/canliborsa/#ALL", {}, false);
@@ -1526,10 +1527,16 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
 
             const currentValue = parts[symbolIndex - 12] ?? null;
             const changeValue = parts[symbolIndex - 9] ?? null;
+            const currentPrice = parseTrNumber(currentValue);
             const changePct = parseTrNumber(changeValue);
+            if (Number.isFinite(currentPrice) && currentPrice > 0) {
+              prices[symbol] = currentPrice;
+            }
             if (Number.isFinite(changePct) && Math.abs(changePct) < 100) {
-              result[symbol] = changePct;
+              changes[symbol] = changePct;
               debug[symbol] = `ok:${currentValue ?? "-"}|%${changeValue ?? "-"}`;
+            } else if (Number.isFinite(currentPrice) && currentPrice > 0) {
+              debug[symbol] = `fiyat:${currentValue ?? "-"}|değişim-yok`;
             } else {
               debug[symbol] = "invalid-number";
             }
@@ -1539,7 +1546,7 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
           console.warn("mynet daily change error", error);
           state.livePreviousCloseDebug = Object.fromEntries(symbols.map((symbol) => [symbol, `error:${String(error)}`]));
         }
-        return result;
+        return { prices, changes };
       }
 
       async function loadLivePrices(symbols, force = false) {
@@ -1569,27 +1576,42 @@ Token varsa sayfa acilisinda Dropbox verisi otomatik yuklenir.
             uniqueSymbols.filter((symbol) => Number.isFinite(snapshotPreviousCloses[symbol])).map((symbol) => [symbol, snapshotPreviousCloses[symbol]])
           );
 
-          const json = await fetchMarketData("https://api.fintables.com/radar/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filters: { type: "group", operator: "and", children: [] },
-              columns: [{ attribute_id: "close" }],
-            }),
-          });
+          let fintablesError = "";
+          try {
+            const json = await fetchMarketData("https://api.fintables.com/radar/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filters: { type: "group", operator: "and", children: [] },
+                columns: [{ attribute_id: "close" }],
+              }),
+            });
 
-          (json.data || []).forEach((row) => {
-            const symbol = String(row.code || "").toUpperCase();
-            const price = Number(row.close);
-            if (uniqueSymbols.includes(symbol) && Number.isFinite(price) && price > 0) {
-              next[symbol] = price;
+            (json.data || []).forEach((row) => {
+              const symbol = String(row.code || "").toUpperCase();
+              const price = Number(row.close);
+              if (uniqueSymbols.includes(symbol) && Number.isFinite(price) && price > 0) {
+                next[symbol] = price;
+              }
+            });
+          } catch (error) {
+            fintablesError = String(error.message || error);
+            console.warn("fintables price error", error);
+          }
+
+          const mynetMarketData = await fetchMynetMarketData(uniqueSymbols);
+          uniqueSymbols.forEach((symbol) => {
+            if (!Number.isFinite(next[symbol]) && Number.isFinite(mynetMarketData.prices[symbol])) {
+              next[symbol] = mynetMarketData.prices[symbol];
             }
           });
 
-          if (!Object.keys(next).length) throw new Error("Fintables: Eşleşen geçerli fiyat bulunamadı.");
+          if (!Object.keys(next).length) {
+            throw new Error(fintablesError || "Fintables ve Mynet kaynaklarından geçerli fiyat alınamadı.");
+          }
           state.livePrices = next;
           updateMarketSnapshots(next);
-          const mynetDailyChanges = await fetchMynetDailyChanges(uniqueSymbols);
+          const mynetDailyChanges = mynetMarketData.changes;
           state.liveDailyChangePcts = mynetDailyChanges;
 
           await Promise.all(
